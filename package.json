@@ -1,0 +1,31 @@
+{
+  "name": "register-plugin",
+  "version": "0.0.0",
+  "description": "A plugin registrator.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zkochan/register-plugin.git"
+  },
+  "keywords": [
+    "plugin",
+    "plugins",
+    "register"
+  ],
+  "author": {
+    "name": "Zoltan Kochan",
+    "email": "zoltan.kochan@gmail.com",
+    "url": "http://kochan.io"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zkochan/register-plugin/issues"
+  },
+  "homepage": "https://github.com/zkochan/register-plugin#readme",
+  "publishConfig": {
+    "registry": "http://registry.npmjs.org"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "node": true,
+  "browser": true,
+  "esnext": true,
+  "expr": true,
+  "bitwise": false,
+  "camelcase": true,
+  "eqeqeq": true,
+  "latedef": true,
+  "newcap": true,
+  "undef": true,
+  "noarg": true,
+  "unused": false,
+  "strict": true,
+  "smarttabs": false,
+  "noempty": true,
+  "indent": 2,
+  "undef": true,
+  "quotmark": "single",
+  "maxlen": 80,
+  "trailing": true,
+  "curly": true,
+  "globals": {
+  },
+  "predef": [
+    "require",
+    "exports",
+    "module",
+    "describe",
+    "before",
+    "beforeEach",
+    "after",
+    "afterEach",
+    "it"
+   ]
+}
