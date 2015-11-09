@@ -2,11 +2,20 @@
 
 var TopoSort = require('topo-sort');
 
-function registerPlugin(target, plugin) {
-  plugin.register.register(target, plugin.options);
+function registerNext(target, plugins, cb) {
+  var plugin = plugins.shift();
+  if (!plugin) {
+    return cb();
+  }
+  plugin.register.register(target, plugin.options, function(err) {
+    if (err) {
+      return cb(err);
+    }
+    registerNext(target, plugins, cb);
+  });
 }
 
-function register(target, plugins) {
+function register(target, plugins, cb) {
   var pluginDict = {};
   var tsort = new TopoSort();
 
@@ -19,11 +28,12 @@ function register(target, plugins) {
     tsort.add(plugin.register.attributes.name, plugin.register.attributes.dependencies || []);
   });
 
-  var sortedPlugins = tsort.sort();
-  sortedPlugins.reverse();
-  sortedPlugins.forEach(function(pluginName) {
-    registerPlugin(target, pluginDict[pluginName]);
+  var sortedPluginNames = tsort.sort();
+  sortedPluginNames.reverse();
+  var sortedPlugins = sortedPluginNames.map(function(pluginName) {
+    return pluginDict[pluginName];
   });
+  registerNext(target, sortedPlugins, cb);
 }
 
 module.exports = register;
