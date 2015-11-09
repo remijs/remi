@@ -3,7 +3,7 @@
 var TopoSort = require('topo-sort');
 
 function registerPlugin(target, plugin) {
-  plugin.register(target);
+  plugin.register.register(target, plugin.options);
 }
 
 function register(target, plugins) {
@@ -11,8 +11,12 @@ function register(target, plugins) {
   var tsort = new TopoSort();
 
   plugins.forEach(function(plugin) {
-    pluginDict[plugin.attributes.name] = plugin;
-    tsort.add(plugin.attributes.name, plugin.attributes.dependencies || []);
+    plugin = plugin.attributes ? {
+      register: plugin,
+      options: {}
+    } : plugin;
+    pluginDict[plugin.register.attributes.name] = plugin;
+    tsort.add(plugin.register.attributes.name, plugin.register.attributes.dependencies || []);
   });
 
   var sortedPlugins = tsort.sort();

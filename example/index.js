@@ -11,6 +11,6 @@ Hub.prototype.register = function(plugins) {
 
 var hub = new Hub();
 hub.register([
-  require('./plugins/bar'),
+  { register: require('./plugins/bar'), options: { sayTimes: 4 } },
   require('./plugins/foo')
 ]);
