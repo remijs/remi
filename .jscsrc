@@ -11,8 +11,6 @@
     "disallowSpacesInsideObjectBrackets": null,
     "disallowImplicitTypeConversion": ["string"],
 
-    "safeContextKeyword": "_this",
-
     "excludeFiles": [
         "test/data/**"
     ],
