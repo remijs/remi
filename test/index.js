@@ -19,4 +19,21 @@ describe('register-plugin', function() {
       done();
     });
   });
+
+  it('throws error if dependent plugin not present', function(done) {
+    function test(app, options, next) {
+      expect(options.something).to.be.true;
+      return next();
+    }
+    test.attributes = {
+      name: 'plugin1',
+      version: '0.0.0',
+      dependencies: ['foo']
+    };
+
+    registerPlugin({}, test, function(err) {
+      expect(err).to.be.an.instanceof(Error);
+      done();
+    });
+  });
 });

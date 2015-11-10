@@ -53,9 +53,15 @@ function register(target, plugins, cb) {
 
   var sortedPluginNames = tsort.sort();
   sortedPluginNames.reverse();
-  var sortedPlugins = sortedPluginNames.map(function(pluginName) {
-    return registrationDict[pluginName];
-  });
+  var sortedPlugins = [];
+  for (var i = 0; i < sortedPluginNames.length; i++) {
+    var pluginName = sortedPluginNames[i];
+    if (!registrationDict[pluginName]) {
+      return cb(new Error('Plugin called ' + pluginName +
+        ' required by dependencies but wasn\'t registered'));
+    }
+    sortedPlugins.push(registrationDict[pluginName]);
+  }
   registerNext(target, sortedPlugins, cb);
 }
 
