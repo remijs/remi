@@ -7,7 +7,7 @@ function registerNext(target, plugins, cb) {
   if (!plugin) {
     return cb();
   }
-  plugin.register.register(target, plugin.options, function(err) {
+  plugin.register(target, plugin.pluginOptions, function(err) {
     if (err) {
       return cb(err);
     }
@@ -16,22 +16,45 @@ function registerNext(target, plugins, cb) {
 }
 
 function register(target, plugins, cb) {
-  var pluginDict = {};
-  var tsort = new TopoSort();
+  plugins = [].concat(plugins);
 
-  plugins.forEach(function(plugin) {
-    plugin = plugin.attributes ? {
-      register: plugin,
-      options: {}
-    } : plugin;
-    pluginDict[plugin.register.attributes.name] = plugin;
-    tsort.add(plugin.register.attributes.name, plugin.register.attributes.dependencies || []);
+  var registrations = [];
+  for (var i = 0; i < plugins.length; ++i) {
+    var plugin = plugins[i];
+
+    if (typeof plugin === 'function' && !plugin.register) {
+      /* plugin is register() function */
+      plugin = { register: plugin };
+    }
+
+    if (plugin.register.register) { /* Required plugin */
+      plugin.register = plugin.register.register;
+    }
+
+    var attributes = plugin.register.attributes;
+    var registration = {
+      register: plugin.register,
+      name: attributes.name || attributes.pkg.name,
+      version: attributes.version || attributes.pkg.version,
+      pluginOptions: plugin.options,
+      dependencies: attributes.dependencies
+    };
+
+    registrations.push(registration);
+  }
+
+  var registrationDict = {};
+  var tsort = new TopoSort();
+  registrations.forEach(function(registration) {
+    registrationDict[registration.name] = registration;
+    var deps = registration.dependencies || [];
+    tsort.add(registration.name, [].concat(deps));
   });
 
   var sortedPluginNames = tsort.sort();
   sortedPluginNames.reverse();
   var sortedPlugins = sortedPluginNames.map(function(pluginName) {
-    return pluginDict[pluginName];
+    return registrationDict[pluginName];
   });
   registerNext(target, sortedPlugins, cb);
 }

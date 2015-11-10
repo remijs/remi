@@ -5,6 +5,7 @@ module.exports.register = function(hub, options, next) {
   next();
 };
 
-module.exports.attributes = {
-  name: 'foo'
+module.exports.register.attributes = {
+  name: 'foo',
+  version: '0.0.0'
 };

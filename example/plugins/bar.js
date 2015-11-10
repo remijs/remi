@@ -7,7 +7,8 @@ module.exports.register = function(hub, options, next) {
   next();
 };
 
-module.exports.attributes = {
+module.exports.register.attributes = {
   name: 'bar',
+  version: '0.0.0',
   dependencies: ['foo']
 };
