@@ -1,11 +1,11 @@
 'use strict';
 
-module.exports.register = function(hub, options, next) {
+module.exports = function(hub, options, next) {
   hub.fooSays = 'Hello world!';
   next();
 };
 
-module.exports.register.attributes = {
+module.exports.attributes = {
   name: 'foo',
   version: '0.0.0'
 };
