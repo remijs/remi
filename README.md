@@ -119,6 +119,35 @@ registerPlugin(app, [{
 ```
 
 
+## Options can be shared
+
+You can pass a third optional `shared options` parameter. The shared options are
+merge with the plugin's options and passed to the regiter method.
+
+```js
+function plugin(app, opts, next) {
+  /* opts will equal {bar: 'bar', foo: 'foo'} */
+
+  next();
+}
+
+plugin.attributes = {
+  name: 'plugin',
+  version: '1.0.0'
+};
+
+registerPlugin(app, [{
+  register: plugin,
+  options: {
+    bar: 'bar'
+  }
+}], {
+  foo: 'foo'
+}, function (err) {
+});
+```
+
+
 ## Example
 
 You can find a working example in the [example folder](example).

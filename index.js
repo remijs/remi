@@ -1,6 +1,7 @@
 'use strict';
 
 var TopoSort = require('topo-sort');
+var mergeLight = require('merge-light');
 
 function registerNext(target, plugins, cb) {
   var plugin = plugins.shift();
@@ -15,7 +16,15 @@ function registerNext(target, plugins, cb) {
   });
 }
 
-function register(target, plugins, cb) {
+function register(target, plugins/*, sharedOpts, cb*/) {
+  var cb, sharedOpts;
+  if (arguments.length === 3) {
+    cb = arguments[2];
+    sharedOpts = {};
+  } else {
+    cb = arguments[3];
+    sharedOpts = arguments[2];
+  }
   plugins = [].concat(plugins);
 
   var registrations = [];
@@ -36,7 +45,7 @@ function register(target, plugins, cb) {
       register: plugin.register,
       name: attributes.name || attributes.pkg.name,
       version: attributes.version || attributes.pkg.version,
-      pluginOptions: plugin.options,
+      pluginOptions: mergeLight({}, plugin.options, sharedOpts),
       dependencies: attributes.dependencies
     };
 

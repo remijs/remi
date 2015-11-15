@@ -20,6 +20,24 @@ describe('register-plugin', function() {
     });
   });
 
+  it('registers plugin with plugin and shared options', function(done) {
+    function test(app, options, next) {
+      expect(options.something).to.be.true;
+      expect(options.somethingShared).to.be.true;
+      return next();
+    }
+    test.attributes = {
+      name: 'test',
+      version: '0.0.0'
+    };
+
+    var sharedOpts = {somethingShared: true};
+    registerPlugin({}, { register: test, options: { something: true } }, sharedOpts, function(err) {
+      expect(err).to.not.exist;
+      done();
+    });
+  });
+
   it('throws error if dependent plugin not present', function(done) {
     function test(app, options, next) {
       expect(options.something).to.be.true;
