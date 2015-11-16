@@ -46,18 +46,28 @@ function register(target, plugins/*, sharedOpts, cb*/) {
       name: attributes.name || attributes.pkg.name,
       version: attributes.version || attributes.pkg.version,
       pluginOptions: mergeLight({}, plugin.options, sharedOpts),
-      dependencies: attributes.dependencies
+      dependencies: attributes.dependencies || [],
+      before: attributes.before || []
     };
 
     registrations.push(registration);
   }
 
   var registrationDict = {};
-  var tsort = new TopoSort();
   registrations.forEach(function(registration) {
     registrationDict[registration.name] = registration;
-    var deps = registration.dependencies || [];
-    tsort.add(registration.name, [].concat(deps));
+  });
+
+  /* extend dependencies with values before */
+  registrations.forEach(function(registration) {
+    registration.before.forEach(function(beforeDep) {
+      registrationDict[beforeDep].dependencies.push(registration.name);
+    });
+  });
+
+  var tsort = new TopoSort();
+  registrations.forEach(function(registration) {
+    tsort.add(registration.name, registration.dependencies);
   });
 
   var sortedPluginNames = tsort.sort();

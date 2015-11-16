@@ -1,6 +1,11 @@
 'use strict';
 
-var expect = require('chai').expect;
+var chai = require('chai');
+var expect = chai.expect;
+var sinon = require('sinon');
+var sinonChai = require('sinon-chai');
+chai.use(sinonChai);
+
 var registerPlugin = require('../');
 
 describe('register-plugin', function() {
@@ -51,6 +56,30 @@ describe('register-plugin', function() {
 
     registerPlugin({}, test, function(err) {
       expect(err).to.be.an.instanceof(Error);
+      done();
+    });
+  });
+
+  it('register plugins in correct order when `before` specified', function(done) {
+    var plugin2 = sinon.spy(function(app, options, next) {
+      return next();
+    });
+    plugin2.attributes = {
+      name: 'plugin2',
+      version: '0.0.0'
+    };
+    var plugin1 = sinon.spy(function plugin1(app, options, next) {
+      return next();
+    });
+    plugin1.attributes = {
+      name: 'plugin1',
+      version: '0.0.0',
+      before: ['plugin2']
+    };
+
+    registerPlugin({}, [plugin2, plugin1], function(err) {
+      expect(err).to.be.undefined;
+      expect(plugin1).to.have.been.calledBefore(plugin2);
       done();
     });
   });
