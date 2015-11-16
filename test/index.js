@@ -68,7 +68,7 @@ describe('register-plugin', function() {
       name: 'plugin2',
       version: '0.0.0'
     };
-    var plugin1 = sinon.spy(function plugin1(app, options, next) {
+    var plugin1 = sinon.spy(function(app, options, next) {
       return next();
     });
     plugin1.attributes = {
@@ -80,6 +80,46 @@ describe('register-plugin', function() {
     registerPlugin({}, [plugin2, plugin1], function(err) {
       expect(err).to.be.undefined;
       expect(plugin1).to.have.been.calledBefore(plugin2);
+      done();
+    });
+  });
+
+  it('exposes the registrations object', function(done) {
+    function plugin1(app, options, next) {
+      return next();
+    }
+    plugin1.attributes = {
+      name: 'plugin1',
+      version: '0.0.0'
+    };
+    function plugin2(app, options, next) {
+      return next();
+    }
+    plugin2.attributes = {
+      name: 'plugin2',
+      version: '0.1.0'
+    };
+
+    var app = {};
+    var plugins = [{
+      register: plugin1,
+      options: {foo: 1}
+    }, {
+      register: plugin2
+    }];
+    registerPlugin(app, plugins, function(err) {
+      expect(err).to.be.undefined;
+
+      expect(app.registrations).to.not.be.undefined;
+      expect(app.registrations.plugin1).to.not.be.undefined;
+      expect(app.registrations.plugin1.name).to.eq('plugin1');
+      expect(app.registrations.plugin1.version).to.eq('0.0.0');
+      expect(app.registrations.plugin1.options.foo).to.eq(1);
+
+      expect(app.registrations.plugin2).to.not.be.undefined;
+      expect(app.registrations.plugin2.name).to.eq('plugin2');
+      expect(app.registrations.plugin2.version).to.eq('0.1.0');
+
       done();
     });
   });

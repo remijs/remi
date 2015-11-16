@@ -122,7 +122,7 @@ registerPlugin(app, [{
 ## Options can be shared
 
 You can pass a third optional `shared options` parameter. The shared options are
-merge with the plugin's options and passed to the regiter method.
+merge with the plugin's options and passed to the register method.
 
 ```js
 function plugin(app, opts, next) {

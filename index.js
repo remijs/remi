@@ -8,7 +8,7 @@ function registerNext(target, plugins, cb) {
   if (!plugin) {
     return cb();
   }
-  plugin.register(target, plugin.pluginOptions, function(err) {
+  plugin.register(target, plugin.options, function(err) {
     if (err) {
       return cb(err);
     }
@@ -45,7 +45,7 @@ function register(target, plugins/*, sharedOpts, cb*/) {
       register: plugin.register,
       name: attributes.name || attributes.pkg.name,
       version: attributes.version || attributes.pkg.version,
-      pluginOptions: mergeLight({}, plugin.options, sharedOpts),
+      options: mergeLight({}, plugin.options, sharedOpts),
       dependencies: attributes.dependencies || [],
       before: attributes.before || []
     };
@@ -54,6 +54,7 @@ function register(target, plugins/*, sharedOpts, cb*/) {
   }
 
   var registrationDict = {};
+  target.registrations = registrationDict;
   registrations.forEach(function(registration) {
     registrationDict[registration.name] = registration;
   });
