@@ -144,6 +144,7 @@ describe('main plugin', function() {
 
     registerPlugin({}, [plugin, mainPlugin], {main: 'main'}, function(err) {
       expect(err).to.be.undefined;
+      expect(mainPlugin).to.have.been.calledOnce;
       expect(mainPlugin).to.have.been.calledBefore(plugin);
       done();
     });

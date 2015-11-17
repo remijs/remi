@@ -79,7 +79,9 @@ function register(target, plugins/*, sharedOpts, cb*/) {
 
   var tsort = new TopoSort();
   registrations.forEach(function(registration) {
-    tsort.add(registration.name, registration.dependencies);
+    if (registration.name !== sharedOpts.main) {
+      tsort.add(registration.name, registration.dependencies);
+    }
   });
 
   var sortedPluginNames = tsort.sort();
