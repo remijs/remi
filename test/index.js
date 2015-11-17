@@ -124,3 +124,66 @@ describe('register-plugin', function() {
     });
   });
 });
+
+describe('main plugin', function() {
+  it('should be registered first', function(done) {
+    var plugin = sinon.spy(function(app, options, next) {
+      return next();
+    });
+    plugin.attributes = {
+      name: 'plugin',
+      version: '0.0.0'
+    };
+    var mainPlugin = sinon.spy(function(app, options, next) {
+      return next();
+    });
+    mainPlugin.attributes = {
+      name: 'main',
+      version: '0.0.0'
+    };
+
+    registerPlugin({}, [plugin, mainPlugin], {main: 'main'}, function(err) {
+      expect(err).to.be.undefined;
+      expect(mainPlugin).to.have.been.calledBefore(plugin);
+      done();
+    });
+  });
+
+  it('should throw exception if has dependencies', function(done) {
+    var plugin = sinon.spy(function(app, options, next) {
+      return next();
+    });
+    plugin.attributes = {
+      name: 'plugin',
+      version: '0.0.0'
+    };
+    var mainPlugin = sinon.spy(function(app, options, next) {
+      return next();
+    });
+    mainPlugin.attributes = {
+      name: 'main',
+      version: '0.0.0',
+      dependencies: ['plugin']
+    };
+
+    registerPlugin({}, [plugin, mainPlugin], {main: 'main'}, function(err) {
+      expect(err).to.be.not.undefined;
+      done();
+    });
+  });
+
+  it('should throw exception if main plugin not passed', function(done) {
+    var plugin = function(app, options, next) {
+      return next();
+    };
+    plugin.attributes = {
+      name: 'plugin',
+      version: '0.0.0'
+    };
+
+    registerPlugin({}, [plugin], {main: 'main'}, function(err) {
+      expect(err).to.be.not.undefined;
+      done();
+    });
+  });
+});

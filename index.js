@@ -59,6 +59,17 @@ function register(target, plugins/*, sharedOpts, cb*/) {
     registrationDict[registration.name] = registration;
   });
 
+  var mainPlugin = registrationDict[sharedOpts.main];
+  if (sharedOpts.main) {
+    if (!mainPlugin) {
+      return cb(new Error('main plugin called `' + sharedOpts.main +
+        '` is missing'));
+    }
+    if (mainPlugin.dependencies.length > 0) {
+      return cb(new Error('main plugin cannot have dependencies'));
+    }
+  }
+
   /* extend dependencies with values before */
   registrations.forEach(function(registration) {
     registration.before.forEach(function(beforeDep) {
@@ -74,6 +85,9 @@ function register(target, plugins/*, sharedOpts, cb*/) {
   var sortedPluginNames = tsort.sort();
   sortedPluginNames.reverse();
   var sortedPlugins = [];
+  if (mainPlugin) {
+    sortedPlugins.push(mainPlugin);
+  }
   for (var i = 0; i < sortedPluginNames.length; i++) {
     var pluginName = sortedPluginNames[i];
     if (!registrationDict[pluginName]) {

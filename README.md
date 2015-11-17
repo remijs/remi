@@ -148,6 +148,31 @@ registerPlugin(app, [{
 ```
 
 
+## Main plugin
+
+You can specify the plugin that should be registered first by passing it's name
+through the `main` option of the shared options. The main plugin can't have any
+dependencies.
+
+```js
+function barPlugin(app, opts, next) {
+  console.log('Hello world!');
+
+  next();
+}
+
+barPlugin.attributes = {
+  name: 'bar-plugin',
+  version: '1.0.0'
+};
+
+registerPlugin(app, [fooPlugin, barPlugin, qazPlugin], {
+  main: 'bar-plugin' /* the bar-plugin will be registered first */
+}, function (err) {
+});
+```
+
+
 ## Example
 
 You can find a working example in the [example folder](example).
