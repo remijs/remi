@@ -150,7 +150,7 @@ registerPlugin(app, [{
 
 ## Main plugin
 
-You can specify the plugin that should be registered first by passing it's name
+You can specify the plugin that should be registered first by passing its name
 through the `main` option of the shared options. The main plugin can't have any
 dependencies.
 
