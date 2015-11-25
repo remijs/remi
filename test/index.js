@@ -188,3 +188,88 @@ describe('main plugin', function() {
     });
   });
 });
+
+describe('plugin context', function() {
+  it('should not share properties assigned by another plugin', function(done) {
+    function plugin1(app, options, next) {
+      app.foo = 1;
+      return next();
+    }
+    plugin1.attributes = {
+      name: 'plugin1',
+      version: '0.0.0'
+    };
+    function plugin2(app, options, next) {
+      expect(app.foo).to.be.undefined;
+      return next();
+    }
+    plugin2.attributes = {
+      name: 'plugin2',
+      version: '0.1.0'
+    };
+
+    var app = {};
+    var plugins = [{
+      register: plugin1,
+      options: {foo: 1}
+    }, {
+      register: plugin2
+    }];
+    registerPlugin(app, plugins, function(err) {
+      expect(err).to.be.undefined;
+
+      done();
+    });
+  });
+
+  it('should have a plugin namespace in plugins', function(done) {
+    function plugin(app, options, next) {
+      expect(app.plugins['foo-plugin']).to.be.not.undefined;
+      return next();
+    }
+    plugin.attributes = {
+      name: 'foo-plugin',
+      version: '0.0.0'
+    };
+
+    var app = {};
+    registerPlugin(app, plugin, function(err) {
+      expect(err).to.be.undefined;
+
+      done();
+    });
+  });
+
+  it('should share the value in root', function(done) {
+    function plugin1(app, options, next) {
+      app.root.foo = 1;
+      return next();
+    }
+    plugin1.attributes = {
+      name: 'plugin1',
+      version: '0.0.0'
+    };
+    function plugin2(app, options, next) {
+      expect(app.foo).to.eq(1);
+      expect(app.root.foo).to.eq(1);
+      return next();
+    }
+    plugin2.attributes = {
+      name: 'plugin2',
+      version: '0.1.0'
+    };
+
+    var app = {};
+    var plugins = [{
+      register: plugin1,
+      options: {foo: 1}
+    }, {
+      register: plugin2
+    }];
+    registerPlugin(app, plugins, function(err) {
+      expect(err).to.be.undefined;
+
+      done();
+    });
+  });
+});

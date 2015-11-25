@@ -8,7 +8,11 @@ function registerNext(target, plugins, cb) {
   if (!plugin) {
     return cb();
   }
-  plugin.register(target, plugin.options, function(err) {
+  target.plugins = target.plugins || {};
+  target.plugins[plugin.name] = {};
+  var pluginTarget = mergeLight({}, target);
+  pluginTarget.root = target;
+  plugin.register(pluginTarget, plugin.options, function(err) {
     if (err) {
       return cb(err);
     }
