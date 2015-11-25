@@ -273,3 +273,47 @@ describe('plugin context', function() {
     });
   });
 });
+
+describe('plugin expose', function() {
+  it('should expose property', function(done) {
+    function plugin(app, options, next) {
+      app.expose('foo', 1);
+      return next();
+    }
+    plugin.attributes = {
+      name: 'plugin',
+      version: '0.0.0'
+    };
+
+    var app = {};
+    registerPlugin(app, plugin, function(err) {
+      expect(err).to.be.undefined;
+      expect(app.plugins.plugin.foo).to.eq(1);
+
+      done();
+    });
+  });
+
+  it('should expose object', function(done) {
+    function plugin(app, options, next) {
+      app.expose({
+        foo: 1,
+        bar: 3
+      });
+      return next();
+    }
+    plugin.attributes = {
+      name: 'plugin',
+      version: '0.0.0'
+    };
+
+    var app = {};
+    registerPlugin(app, plugin, function(err) {
+      expect(err).to.be.undefined;
+      expect(app.plugins.plugin.foo).to.eq(1);
+      expect(app.plugins.plugin.bar).to.eq(3);
+
+      done();
+    });
+  });
+});

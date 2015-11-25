@@ -12,6 +12,13 @@ function registerNext(target, plugins, cb) {
   target.plugins[plugin.name] = {};
   var pluginTarget = mergeLight({}, target);
   pluginTarget.root = target;
+  pluginTarget.expose = function(key, value) {
+    if (typeof key === 'string') {
+      target.plugins[plugin.name][key] = value;
+      return;
+    }
+    mergeLight(target.plugins[plugin.name], key);
+  };
   plugin.register(pluginTarget, plugin.options, function(err) {
     if (err) {
       return cb(err);
