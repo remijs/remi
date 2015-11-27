@@ -19,6 +19,20 @@ function registerNext(target, plugins, cb) {
     }
     mergeLight(target.plugins[plugin.name], key);
   };
+  pluginTarget.decorate = function(prop, method) {
+    var extention;
+    if (typeof prop === 'string') {
+      extention = {};
+      extention[prop] = method;
+    } else if (typeof prop === 'object') {
+      extention = prop;
+    } else {
+      throw new Error('invalid arguments passed to decorate');
+    }
+
+    mergeLight(pluginTarget, extention);
+    mergeLight(target, extention);
+  };
   try {
     plugin.register(pluginTarget, plugin.options, function(err) {
       if (err) {

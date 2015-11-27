@@ -332,3 +332,81 @@ describe('plugin expose', function() {
     });
   });
 });
+
+describe('decorate', function() {
+  it('should decorate with a single property', function(done) {
+    function plugin1(app, options, next) {
+      app.decorate('foo', 1);
+      expect(app.foo).to.eq(1);
+      expect(app.root.foo).to.eq(1);
+      return next();
+    }
+    plugin1.attributes = {
+      name: 'plugin1',
+      version: '0.0.0'
+    };
+    function plugin2(app, options, next) {
+      expect(app.foo).to.eq(1);
+      expect(app.root.foo).to.eq(1);
+      return next();
+    }
+    plugin2.attributes = {
+      name: 'plugin2',
+      version: '0.1.0'
+    };
+
+    var app = {};
+    var plugins = [{
+      register: plugin1,
+      options: {foo: 1}
+    }, {
+      register: plugin2
+    }];
+    registerPlugin(app, plugins, function(err) {
+      expect(err).to.be.undefined;
+
+      expect(app.foo).to.eq(1);
+
+      done();
+    });
+  });
+
+  it('should decorate with a single property', function(done) {
+    function plugin1(app, options, next) {
+      app.decorate({
+        foo: 1
+      });
+      expect(app.foo).to.eq(1);
+      expect(app.root.foo).to.eq(1);
+      return next();
+    }
+    plugin1.attributes = {
+      name: 'plugin1',
+      version: '0.0.0'
+    };
+    function plugin2(app, options, next) {
+      expect(app.foo).to.eq(1);
+      expect(app.root.foo).to.eq(1);
+      return next();
+    }
+    plugin2.attributes = {
+      name: 'plugin2',
+      version: '0.1.0'
+    };
+
+    var app = {};
+    var plugins = [{
+      register: plugin1,
+      options: {foo: 1}
+    }, {
+      register: plugin2
+    }];
+    registerPlugin(app, plugins, function(err) {
+      expect(err).to.be.undefined;
+
+      expect(app.foo).to.eq(1);
+
+      done();
+    });
+  });
+});
