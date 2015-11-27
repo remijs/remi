@@ -19,12 +19,16 @@ function registerNext(target, plugins, cb) {
     }
     mergeLight(target.plugins[plugin.name], key);
   };
-  plugin.register(pluginTarget, plugin.options, function(err) {
-    if (err) {
-      return cb(err);
-    }
-    registerNext(target, plugins, cb);
-  });
+  try {
+    plugin.register(pluginTarget, plugin.options, function(err) {
+      if (err) {
+        return cb(err);
+      }
+      registerNext(target, plugins, cb);
+    });
+  } catch (err) {
+    cb(err);
+  }
 }
 
 function register(target, plugins/*, sharedOpts, cb*/) {

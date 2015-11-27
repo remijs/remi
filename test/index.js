@@ -25,6 +25,21 @@ describe('register-plugin', function() {
     });
   });
 
+  it('passes an error to the callback if error in plugin', function(done) {
+    function test(app, options, next) {
+      throw 'error';
+    }
+    test.attributes = {
+      name: 'test',
+      version: '0.0.0'
+    };
+
+    registerPlugin({}, test, function(err) {
+      expect(err).to.eq('error');
+      done();
+    });
+  });
+
   it('registers plugin with plugin and shared options', function(done) {
     function test(app, options, next) {
       expect(options.something).to.be.true;
