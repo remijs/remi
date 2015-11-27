@@ -287,6 +287,35 @@ describe('plugin context', function() {
       done();
     });
   });
+
+  it('should pass all the app props to the plugin', function(done) {
+    function plugin(app, options, next) {
+      expect(app.foo).to.exist;
+      expect(app.foo).to.eq(app.root.foo);
+      expect(app.bar).to.exist;
+      expect(app.bar).to.eq(app.root.bar);
+      expect(app.protoFn).to.exist;
+      expect(app.protoFn).to.eq(app.root.protoFn);
+      return next();
+    }
+    plugin.attributes = {
+      name: 'foo-plugin',
+      version: '0.0.0'
+    };
+
+    function App() {}
+    App.prototype.protoFn = function() {};
+    var app = new App();
+    app.foo = 1;
+    app.bar = function() {
+      return 2;
+    };
+    registerPlugin(app, plugin, function(err) {
+      expect(err).to.be.undefined;
+
+      done();
+    });
+  });
 });
 
 describe('plugin expose', function() {
@@ -371,7 +400,7 @@ describe('decorate', function() {
     });
   });
 
-  it('should decorate with a single property', function(done) {
+  it('should decorate with with multiple properties', function(done) {
     function plugin1(app, options, next) {
       app.decorate({
         foo: 1

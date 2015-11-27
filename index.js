@@ -1,7 +1,7 @@
 'use strict';
 
 var TopoSort = require('topo-sort');
-var mergeLight = require('merge-light');
+var merge = require('merge');
 
 function registerNext(target, plugins, cb) {
   var plugin = plugins.shift();
@@ -10,14 +10,14 @@ function registerNext(target, plugins, cb) {
   }
   target.plugins = target.plugins || {};
   target.plugins[plugin.name] = {};
-  var pluginTarget = mergeLight({}, target);
+  var pluginTarget = merge({}, target);
   pluginTarget.root = target;
   pluginTarget.expose = function(key, value) {
     if (typeof key === 'string') {
       target.plugins[plugin.name][key] = value;
       return;
     }
-    mergeLight(target.plugins[plugin.name], key);
+    merge(target.plugins[plugin.name], key);
   };
   pluginTarget.decorate = function(prop, method) {
     var extention;
@@ -30,8 +30,8 @@ function registerNext(target, plugins, cb) {
       throw new Error('invalid arguments passed to decorate');
     }
 
-    mergeLight(pluginTarget, extention);
-    mergeLight(target, extention);
+    merge(pluginTarget, extention);
+    merge(target, extention);
   };
   try {
     plugin.register(pluginTarget, plugin.options, function(err) {
@@ -74,7 +74,7 @@ function register(target, plugins/*, sharedOpts, cb*/) {
       register: plugin.register,
       name: attributes.name || attributes.pkg.name,
       version: attributes.version || attributes.pkg.version,
-      options: mergeLight({}, plugin.options, sharedOpts),
+      options: merge({}, plugin.options, sharedOpts),
       dependencies: attributes.dependencies || [],
       before: attributes.before || []
     };
