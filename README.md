@@ -101,7 +101,7 @@ registerPlugin(app, {
   options: {
     message: 'hello'
   }
-}, function (err) {
+}, function(err) {
 });
 ```
 
@@ -114,8 +114,59 @@ registerPlugin(app, [{
 }, {
   register: require('plugin2'),
   options: {}
-}], function (err) {
+}], function(err) {
 });
+```
+
+
+## Decorating the API
+
+The `.decorate` method can be used to extend the app's API.
+
+```js
+function plugin(app, opts, next) {
+  /* The app can be decorated by one property at once */
+  app.decorate('foo', function() {
+    console.log('foo');
+  });
+
+  /* or by several properties at once */
+  app.decorate({
+    bar: 23,
+    qax: 54
+  });
+
+  next();
+}
+```
+
+
+## app.expose(key, value)
+
+Used within a plugin to expose a property via app.plugins[name] where:
+
+* `key` - the key assigned (`server.plugins[name][key]`).
+* `value` - the value assigned.
+
+```js
+exports.register = function(app, opts, next) {
+  app.expose('util', function() { console.log('something'); });
+  return next();
+};
+```
+
+
+## server.expose(obj)
+
+Merges a shallow copy of an object into to the existing content of `server.plugins[name]` where:
+
+* `obj` - the object merged into the exposed properties container.
+
+```js
+exports.register = function(app, opts, next) {
+  app.expose({ util: function() { console.log('something'); } });
+  return next();
+};
 ```
 
 
