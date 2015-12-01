@@ -33,16 +33,12 @@ function registerNext(target, plugins, cb) {
     merge(pluginTarget, extention);
     merge(target, extention);
   };
-  try {
-    plugin.register(pluginTarget, plugin.options, function(err) {
-      if (err) {
-        return cb(err);
-      }
-      registerNext(target, plugins, cb);
-    });
-  } catch (err) {
-    cb(err);
-  }
+  plugin.register(pluginTarget, plugin.options, function(err) {
+    if (err) {
+      return cb(err);
+    }
+    registerNext(target, plugins, cb);
+  });
 }
 
 function register(target, plugins/*, sharedOpts, cb*/) {
