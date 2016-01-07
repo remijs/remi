@@ -16,6 +16,9 @@
     "extension",
     "register"
   ],
+  "files": [
+    "index.js"
+  ],
   "author": {
     "name": "Zoltan Kochan",
     "email": "zoltan.kochan@gmail.com",
