@@ -1,6 +1,6 @@
 {
   "name": "register-plugin",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "A plugin registrator.",
   "main": "index.js",
   "scripts": {
