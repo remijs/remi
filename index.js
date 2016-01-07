@@ -69,7 +69,7 @@ function register(target, plugins/*, sharedOpts, cb*/) {
     var registration = {
       register: plugin.register,
       name: attributes.name || attributes.pkg.name,
-      version: attributes.version || attributes.pkg.version,
+      version: attributes.version || attributes.pkg && attributes.pkg.version,
       options: merge({}, plugin.options, sharedOpts),
       dependencies: attributes.dependencies || [],
       before: attributes.before || []

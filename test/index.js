@@ -9,6 +9,20 @@ chai.use(sinonChai);
 var registerPlugin = require('../');
 
 describe('register-plugin', function() {
+  it('should register plugin with no version', function(done) {
+    function test(app, options, next) {
+      return next();
+    }
+    test.attributes = {
+      name: 'test'
+    };
+
+    registerPlugin({}, { register: test }, function(err) {
+      expect(err).to.not.exist;
+      done();
+    });
+  });
+
   it('registers plugin with options', function(done) {
     function test(app, options, next) {
       expect(options.something).to.be.true;
