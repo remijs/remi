@@ -3,6 +3,13 @@
 const TopoSort = require('topo-sort')
 const merge = require('merge')
 
+function Remi(opts) {
+  opts = opts || {}
+
+  this._main = opts.main
+  this._corePlugins = opts.corePlugins || []
+}
+
 function registerNext(target, plugins, cb) {
   let plugin = plugins.shift()
   if (!plugin) {
@@ -46,7 +53,7 @@ function registerNext(target, plugins, cb) {
   })
 }
 
-function register(target, plugins/*, sharedOpts, cb*/) {
+Remi.prototype.register = function(target, plugins/*, sharedOpts, cb*/) {
   let cb, sharedOpts
   if (arguments.length === 3) {
     cb = arguments[2]
@@ -55,7 +62,9 @@ function register(target, plugins/*, sharedOpts, cb*/) {
     cb = arguments[3]
     sharedOpts = arguments[2]
   }
-  plugins = [].concat(plugins)
+  plugins = this._corePlugins.concat(plugins)
+
+  target.registrations = target.registrations || {}
 
   let registrations = []
   for (let i = 0; i < plugins.length; ++i) {
@@ -80,19 +89,19 @@ function register(target, plugins/*, sharedOpts, cb*/) {
       before: attributes.before || [],
     }
 
-    registrations.push(registration)
+    if (!target.registrations[registrations.name]) {
+      registrations.push(registration)
+    }
   }
 
-  let registrationDict = {}
-  target.registrations = registrationDict
   registrations.forEach(function(registration) {
-    registrationDict[registration.name] = registration
+    target.registrations[registration.name] = registration
   })
 
-  let mainPlugin = registrationDict[sharedOpts.main]
-  if (sharedOpts.main) {
+  let mainPlugin = target.registrations[this._main]
+  if (this._main) {
     if (!mainPlugin) {
-      return cb(new Error('main plugin called `' + sharedOpts.main +
+      return cb(new Error('main plugin called `' + this._main +
         '` is missing'))
     }
     if (mainPlugin.dependencies.length > 0) {
@@ -103,13 +112,13 @@ function register(target, plugins/*, sharedOpts, cb*/) {
   /* extend dependencies with values before */
   registrations.forEach(function(registration) {
     registration.before.forEach(function(beforeDep) {
-      registrationDict[beforeDep].dependencies.push(registration.name)
+      target.registrations[beforeDep].dependencies.push(registration.name)
     })
   })
 
   let tsort = new TopoSort()
-  registrations.forEach(function(registration) {
-    if (registration.name !== sharedOpts.main) {
+  registrations.forEach(registration => {
+    if (registration.name !== this._main) {
       tsort.add(registration.name, registration.dependencies)
     }
   })
@@ -122,13 +131,13 @@ function register(target, plugins/*, sharedOpts, cb*/) {
   }
   for (let i = 0; i < sortedPluginNames.length; i++) {
     let pluginName = sortedPluginNames[i]
-    if (!registrationDict[pluginName]) {
+    if (!target.registrations[pluginName]) {
       return cb(new Error('Plugin called ' + pluginName +
         ' required by dependencies but wasn\'t registered'))
     }
-    sortedPlugins.push(registrationDict[pluginName])
+    sortedPlugins.push(target.registrations[pluginName])
   }
   registerNext(target, sortedPlugins, cb)
 }
 
-module.exports = register
+module.exports = Remi

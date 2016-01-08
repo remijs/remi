@@ -6,7 +6,7 @@ const sinon = require('sinon')
 const sinonChai = require('sinon-chai')
 chai.use(sinonChai)
 
-const registerPlugin = require('../')
+const Remi = require('../')
 
 describe('register-plugin', function() {
   it('should register plugin with no version', function(done) {
@@ -17,7 +17,7 @@ describe('register-plugin', function() {
       name: 'test',
     }
 
-    registerPlugin({}, { register: test }, function(err) {
+    new Remi().register({}, { register: test }, function(err) {
       expect(err).to.not.exist
       done()
     })
@@ -33,7 +33,7 @@ describe('register-plugin', function() {
       version: '0.0.0',
     }
 
-    registerPlugin({}, { register: test, options: { something: true } }, function(err) {
+    new Remi().register({}, { register: test, options: { something: true } }, function(err) {
       expect(err).to.not.exist
       done()
     })
@@ -51,7 +51,7 @@ describe('register-plugin', function() {
     }
 
     let sharedOpts = {somethingShared: true}
-    registerPlugin({}, { register: test, options: { something: true } }, sharedOpts, function(err) {
+    new Remi().register({}, { register: test, options: { something: true } }, sharedOpts, function(err) {
       expect(err).to.not.exist
       done()
     })
@@ -68,7 +68,7 @@ describe('register-plugin', function() {
       dependencies: ['foo'],
     }
 
-    registerPlugin({}, test, function(err) {
+    new Remi().register({}, test, function(err) {
       expect(err).to.be.an.instanceof(Error)
       done()
     })
@@ -91,7 +91,7 @@ describe('register-plugin', function() {
       before: ['plugin2'],
     }
 
-    registerPlugin({}, [plugin2, plugin1], function(err) {
+    new Remi().register({}, [plugin2, plugin1], function(err) {
       expect(err).to.be.undefined
       expect(plugin1).to.have.been.calledBefore(plugin2)
       done()
@@ -121,7 +121,7 @@ describe('register-plugin', function() {
     }, {
       register: plugin2,
     },]
-    registerPlugin(app, plugins, function(err) {
+    new Remi().register(app, plugins, function(err) {
       expect(err).to.be.undefined
 
       expect(app.registrations).to.not.be.undefined
@@ -156,7 +156,12 @@ describe('main plugin', function() {
       version: '0.0.0',
     }
 
-    registerPlugin({}, [plugin, mainPlugin], {main: 'main'}, function(err) {
+    let remi = new Remi({
+      main: 'main',
+      corePlugins: [mainPlugin],
+    })
+
+    remi.register({}, [plugin], function(err) {
       expect(err).to.be.undefined
       expect(mainPlugin).to.have.been.calledOnce
       expect(mainPlugin).to.have.been.calledBefore(plugin)
@@ -181,14 +186,19 @@ describe('main plugin', function() {
       dependencies: ['plugin'],
     }
 
-    registerPlugin({}, [plugin, mainPlugin], {main: 'main'}, function(err) {
+    let remi = new Remi({
+      main: 'main',
+      corePlugins: [mainPlugin],
+    })
+
+    remi.register({}, [plugin], function(err) {
       expect(err).to.be.not.undefined
       done()
     })
   })
 
   it('should throw exception if main plugin not passed', function(done) {
-    let plugin = function(app, options, next) {
+    function plugin(app, options, next) {
       return next()
     }
     plugin.attributes = {
@@ -196,7 +206,11 @@ describe('main plugin', function() {
       version: '0.0.0',
     }
 
-    registerPlugin({}, [plugin], {main: 'main'}, function(err) {
+    let remi = new Remi({
+      main: 'main',
+    })
+
+    remi.register({}, [plugin], function(err) {
       expect(err).to.be.not.undefined
       done()
     })
@@ -229,7 +243,7 @@ describe('plugin context', function() {
     }, {
       register: plugin2,
     },]
-    registerPlugin(app, plugins, function(err) {
+    new Remi().register(app, plugins, function(err) {
       expect(err).to.be.undefined
 
       done()
@@ -247,7 +261,7 @@ describe('plugin context', function() {
     }
 
     let app = {}
-    registerPlugin(app, plugin, function(err) {
+    new Remi().register(app, plugin, function(err) {
       expect(err).to.be.undefined
 
       done()
@@ -280,7 +294,7 @@ describe('plugin context', function() {
     }, {
       register: plugin2,
     },]
-    registerPlugin(app, plugins, function(err) {
+    new Remi().register(app, plugins, function(err) {
       expect(err).to.be.undefined
 
       done()
@@ -309,7 +323,7 @@ describe('plugin context', function() {
     app.bar = function() {
       return 2
     }
-    registerPlugin(app, plugin, function(err) {
+    new Remi().register(app, plugin, function(err) {
       expect(err).to.be.undefined
 
       done()
@@ -329,7 +343,7 @@ describe('plugin expose', function() {
     }
 
     let app = {}
-    registerPlugin(app, plugin, function(err) {
+    new Remi().register(app, plugin, function(err) {
       expect(err).to.be.undefined
       expect(app.plugins.plugin.foo).to.eq(1)
 
@@ -351,7 +365,7 @@ describe('plugin expose', function() {
     }
 
     let app = {}
-    registerPlugin(app, plugin, function(err) {
+    new Remi().register(app, plugin, function(err) {
       expect(err).to.be.undefined
       expect(app.plugins.plugin.foo).to.eq(1)
       expect(app.plugins.plugin.bar).to.eq(3)
@@ -390,7 +404,7 @@ describe('decorate', function() {
     }, {
       register: plugin2,
     },]
-    registerPlugin(app, plugins, function(err) {
+    new Remi().register(app, plugins, function(err) {
       expect(err).to.be.undefined
 
       expect(app.foo).to.eq(1)
@@ -429,7 +443,7 @@ describe('decorate', function() {
     }, {
       register: plugin2,
     },]
-    registerPlugin(app, plugins, function(err) {
+    new Remi().register(app, plugins, function(err) {
       expect(err).to.be.undefined
 
       expect(app.foo).to.eq(1)
