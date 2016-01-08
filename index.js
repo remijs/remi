@@ -2,25 +2,34 @@
 
 const TopoSort = require('topo-sort')
 const merge = require('merge')
+const magicHook = require('magic-hook')
 
 function Remi(opts) {
   opts = opts || {}
 
   this._main = opts.main
   this._corePlugins = opts.corePlugins || []
+  this._extensions = opts.extensions || []
+
+  magicHook(this, ['createPlugin'])
+
+  this._extensions.forEach(ext => ext(this))
 }
 
-function registerNext(target, plugins, cb) {
+Remi.prototype.createPlugin = function(target) {
+  return target
+}
+
+Remi.prototype._registerNext = function(target, plugins, cb) {
   let plugin = plugins.shift()
   if (!plugin) {
     return cb()
   }
-
+/*
   target.plugins = target.plugins || {}
-  target.plugins[plugin.name] = {}
-
-  let pluginTarget = merge({}, target)
-  pluginTarget.root = target
+  target.plugins[plugin.name] = {}*/
+  let pluginTarget = this.createPlugin(merge({}, target), plugin)
+/*  pluginTarget.root = target
 
   pluginTarget.expose = function(key, value) {
     if (typeof key === 'string') {
@@ -43,13 +52,13 @@ function registerNext(target, plugins, cb) {
 
     merge(pluginTarget, extention)
     merge(target, extention)
-  }
+  }*/
 
-  plugin.register(pluginTarget, plugin.options, function(err) {
+  plugin.register(pluginTarget, plugin.options, err => {
     if (err) {
       return cb(err)
     }
-    registerNext(target, plugins, cb)
+    this._registerNext(target, plugins, cb)
   })
 }
 
@@ -135,7 +144,7 @@ Remi.prototype.register = function(target, plugins/*, sharedOpts, cb*/) {
     }
     sortedPlugins.push(target.registrations[pluginName])
   }
-  registerNext(target, sortedPlugins, cb)
+  this._registerNext(target, sortedPlugins, cb)
 }
 
 module.exports = Remi
