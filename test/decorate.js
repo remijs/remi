@@ -14,7 +14,6 @@ describe('decorate', function() {
     function plugin1(app, options, next) {
       app.decorate('foo', 1)
       expect(app.foo).to.eq(1)
-      expect(app.root.foo).to.eq(1)
       return next()
     }
     plugin1.attributes = {
@@ -23,7 +22,6 @@ describe('decorate', function() {
     }
     function plugin2(app, options, next) {
       expect(app.foo).to.eq(1)
-      expect(app.root.foo).to.eq(1)
       return next()
     }
     plugin2.attributes = {
@@ -42,9 +40,6 @@ describe('decorate', function() {
       extensions: [decorate],
     }).register(app, plugins, function(err) {
       expect(err).to.be.undefined
-
-      expect(app.foo).to.eq(1)
-
       done()
     })
   })
@@ -55,7 +50,6 @@ describe('decorate', function() {
         foo: 1,
       })
       expect(app.foo).to.eq(1)
-      expect(app.root.foo).to.eq(1)
       return next()
     }
     plugin1.attributes = {
@@ -64,7 +58,6 @@ describe('decorate', function() {
     }
     function plugin2(app, options, next) {
       expect(app.foo).to.eq(1)
-      expect(app.root.foo).to.eq(1)
       return next()
     }
     plugin2.attributes = {
@@ -83,9 +76,6 @@ describe('decorate', function() {
       extensions: [decorate],
     }).register(app, plugins, function(err) {
       expect(err).to.be.undefined
-
-      expect(app.foo).to.eq(1)
-
       done()
     })
   })

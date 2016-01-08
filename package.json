@@ -34,7 +34,7 @@
     "registry": "http://registry.npmjs.org"
   },
   "dependencies": {
-    "magic-hook": "^0.1.0",
+    "magic-hook": "^0.1.1",
     "merge": "^1.2.0",
     "topo-sort": "^1.0.0"
   },
