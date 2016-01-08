@@ -54,7 +54,8 @@ function registerNext(target, plugins, cb) {
 }
 
 Remi.prototype.register = function(target, plugins/*, sharedOpts, cb*/) {
-  let cb, sharedOpts
+  let cb
+  let sharedOpts
   if (arguments.length === 3) {
     cb = arguments[2]
     sharedOpts = {}
@@ -89,14 +90,11 @@ Remi.prototype.register = function(target, plugins/*, sharedOpts, cb*/) {
       before: attributes.before || [],
     }
 
-    if (!target.registrations[registrations.name]) {
+    if (!target.registrations[registration.name]) {
       registrations.push(registration)
+      target.registrations[registration.name] = registration
     }
   }
-
-  registrations.forEach(function(registration) {
-    target.registrations[registration.name] = registration
-  })
 
   let mainPlugin = target.registrations[this._main]
   if (this._main) {

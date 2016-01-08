@@ -137,6 +137,61 @@ describe('register-plugin', function() {
       done()
     })
   })
+
+  it('should register plugin only once', function(done) {
+    let plugin = sinon.spy(function(app, options, next) {
+      return next()
+    })
+    plugin.attributes = {
+      name: 'plugin',
+      version: '0.0.0',
+    }
+
+    let remi = new Remi({
+      corePlugins: [plugin],
+    })
+
+    let target = {}
+    remi.register(target, [plugin], function(err) {
+      expect(err).to.be.undefined
+
+      remi.register(target, [plugin], function(err) {
+        expect(err).to.be.undefined
+        expect(plugin).to.have.been.calledOnce
+        done()
+      })
+    })
+  })
+
+  it('should not return an error if dependency was already registered', function(done) {
+    function plugin1(app, options, next) {
+      return next()
+    }
+    plugin1.attributes = {
+      name: 'plugin1',
+      version: '0.0.0',
+    }
+    function plugin2(app, options, next) {
+      return next()
+    }
+    plugin2.attributes = {
+      name: 'plugin2',
+      version: '0.0.0',
+      dependencies: ['plugin1'],
+    }
+
+    let remi = new Remi({})
+
+    let target = {}
+    remi.register(target, [plugin1], function(err) {
+      expect(err).to.be.undefined
+
+      remi.register(target, [plugin2], function(err) {
+        expect(err).to.be.undefined
+        done()
+      })
+    })
+  })
 })
 
 describe('main plugin', function() {
