@@ -20,45 +20,19 @@ Remi.prototype.createPlugin = function(target) {
   return target
 }
 
-Remi.prototype._registerNext = function(target, plugins, cb) {
+Remi.prototype._registerNext = function(target, plugins, cb, prevPluginTarget) {
   let plugin = plugins.shift()
   if (!plugin) {
-    return cb()
+    return cb(null, prevPluginTarget)
   }
-/*
-  target.plugins = target.plugins || {}
-  target.plugins[plugin.name] = {}*/
+
   let pluginTarget = this.createPlugin(merge({}, target), plugin)
-/*  pluginTarget.root = target
 
-  pluginTarget.expose = function(key, value) {
-    if (typeof key === 'string') {
-      target.plugins[plugin.name][key] = value
-      return
-    }
-    merge(target.plugins[plugin.name], key)
-  }
-
-  pluginTarget.decorate = function(prop, method) {
-    let extention
-    if (typeof prop === 'string') {
-      extention = {}
-      extention[prop] = method
-    } else if (typeof prop === 'object') {
-      extention = prop
-    } else {
-      throw new Error('invalid arguments passed to decorate')
-    }
-
-    merge(pluginTarget, extention)
-    merge(target, extention)
-  }*/
-
-  plugin.register(pluginTarget, plugin.options, err => {
+  plugin.register(merge({}, pluginTarget), plugin.options, err => {
     if (err) {
       return cb(err)
     }
-    this._registerNext(target, plugins, cb)
+    this._registerNext(target, plugins, cb, pluginTarget)
   })
 }
 

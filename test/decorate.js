@@ -39,7 +39,7 @@ describe('decorate', function() {
     new Remi({
       extensions: [decorate],
     }).register(app, plugins, function(err) {
-      expect(err).to.be.undefined
+      expect(err).to.not.exist
       done()
     })
   })
@@ -75,7 +75,7 @@ describe('decorate', function() {
     new Remi({
       extensions: [decorate],
     }).register(app, plugins, function(err) {
-      expect(err).to.be.undefined
+      expect(err).to.not.exist
       done()
     })
   })

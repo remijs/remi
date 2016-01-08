@@ -24,7 +24,7 @@ describe('plugin expose', function() {
     new Remi({
       extensions: [expose],
     }).register(app, plugin, function(err, app) {
-      expect(err).to.be.undefined
+      expect(err).to.not.exist
       expect(app.plugins.plugin.foo).to.eq(1)
 
       done()
@@ -48,9 +48,29 @@ describe('plugin expose', function() {
     new Remi({
       extensions: [expose],
     }).register(app, plugin, function(err, app) {
-      expect(err).to.be.undefined
+      expect(err).to.not.exist
       expect(app.plugins.plugin.foo).to.eq(1)
       expect(app.plugins.plugin.bar).to.eq(3)
+
+      done()
+    })
+  })
+
+  it('should have a plugin namespace in plugins', function(done) {
+    function plugin(app, options, next) {
+      expect(app.plugins['foo-plugin']).to.be.not.undefined
+      return next()
+    }
+    plugin.attributes = {
+      name: 'foo-plugin',
+      version: '0.0.0',
+    }
+
+    let app = {}
+    new Remi({
+      extensions: [expose],
+    }).register(app, plugin, function(err) {
+      expect(err).to.not.exist
 
       done()
     })

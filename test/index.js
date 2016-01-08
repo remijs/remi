@@ -92,7 +92,7 @@ describe('register-plugin', function() {
     }
 
     new Remi().register({}, [plugin2, plugin1], function(err) {
-      expect(err).to.be.undefined
+      expect(err).to.not.exist
       expect(plugin1).to.have.been.calledBefore(plugin2)
       done()
     })
@@ -122,7 +122,7 @@ describe('register-plugin', function() {
       register: plugin2,
     },]
     new Remi().register(app, plugins, function(err) {
-      expect(err).to.be.undefined
+      expect(err).to.not.exist
 
       expect(app.registrations).to.not.be.undefined
       expect(app.registrations.plugin1).to.not.be.undefined
@@ -153,10 +153,10 @@ describe('register-plugin', function() {
 
     let target = {}
     remi.register(target, [plugin], function(err) {
-      expect(err).to.be.undefined
+      expect(err).to.not.exist
 
       remi.register(target, [plugin], function(err) {
-        expect(err).to.be.undefined
+        expect(err).to.not.exist
         expect(plugin).to.have.been.calledOnce
         done()
       })
@@ -184,10 +184,10 @@ describe('register-plugin', function() {
 
     let target = {}
     remi.register(target, [plugin1], function(err) {
-      expect(err).to.be.undefined
+      expect(err).to.not.exist
 
       remi.register(target, [plugin2], function(err) {
-        expect(err).to.be.undefined
+        expect(err).to.not.exist
         done()
       })
     })
@@ -217,7 +217,7 @@ describe('main plugin', function() {
     })
 
     remi.register({}, [plugin], function(err) {
-      expect(err).to.be.undefined
+      expect(err).to.not.exist
       expect(mainPlugin).to.have.been.calledOnce
       expect(mainPlugin).to.have.been.calledBefore(plugin)
       done()
@@ -299,58 +299,7 @@ describe('plugin context', function() {
       register: plugin2,
     },]
     new Remi().register(app, plugins, function(err) {
-      expect(err).to.be.undefined
-
-      done()
-    })
-  })
-
-  it('should have a plugin namespace in plugins', function(done) {
-    function plugin(app, options, next) {
-      expect(app.plugins['foo-plugin']).to.be.not.undefined
-      return next()
-    }
-    plugin.attributes = {
-      name: 'foo-plugin',
-      version: '0.0.0',
-    }
-
-    let app = {}
-    new Remi().register(app, plugin, function(err) {
-      expect(err).to.be.undefined
-
-      done()
-    })
-  })
-
-  it('should share the value in root', function(done) {
-    function plugin1(app, options, next) {
-      app.root.foo = 1
-      return next()
-    }
-    plugin1.attributes = {
-      name: 'plugin1',
-      version: '0.0.0',
-    }
-    function plugin2(app, options, next) {
-      expect(app.foo).to.eq(1)
-      expect(app.root.foo).to.eq(1)
-      return next()
-    }
-    plugin2.attributes = {
-      name: 'plugin2',
-      version: '0.1.0',
-    }
-
-    let app = {}
-    let plugins = [{
-      register: plugin1,
-      options: {foo: 1},
-    }, {
-      register: plugin2,
-    },]
-    new Remi().register(app, plugins, function(err) {
-      expect(err).to.be.undefined
+      expect(err).to.not.exist
 
       done()
     })
@@ -376,7 +325,7 @@ describe('plugin context', function() {
       return 2
     }
     new Remi().register(app, plugin, function(err) {
-      expect(err).to.be.undefined
+      expect(err).to.not.exist
       done()
     })
   })
