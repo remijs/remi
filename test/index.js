@@ -163,6 +163,29 @@ describe('register-plugin', function() {
     })
   })
 
+  it('should return a promise', function(done) {
+    let plugin = sinon.spy(function(app, options, next) {
+      return next()
+    })
+    plugin.attributes = {
+      name: 'plugin',
+      version: '0.0.0',
+    }
+
+    let remi = new Remi({
+      corePlugins: [plugin],
+    })
+
+    let target = {}
+    remi
+      .register(target, [plugin])
+      .then(target => remi.register(target, [plugin]))
+      .then(function() {
+        expect(plugin).to.have.been.calledOnce
+        done()
+      })
+  })
+
   it('should not return an error if dependency was already registered', function(done) {
     function plugin1(app, options, next) {
       return next()

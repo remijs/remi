@@ -3,6 +3,7 @@
 const TopoSort = require('topo-sort')
 const merge = require('merge')
 const magicHook = require('magic-hook')
+const thenify = require('thenify').withCallback
 
 function Remi(opts) {
   opts = opts || {}
@@ -36,7 +37,7 @@ Remi.prototype._registerNext = function(target, plugins, cb, prevPluginTarget) {
   })
 }
 
-Remi.prototype.register = function(target, plugins/*, sharedOpts, cb*/) {
+Remi.prototype.register = thenify(function(target, plugins/*, sharedOpts, cb*/) {
   let cb
   let sharedOpts
   if (arguments.length === 3) {
@@ -119,6 +120,6 @@ Remi.prototype.register = function(target, plugins/*, sharedOpts, cb*/) {
     sortedPlugins.push(target.registrations[pluginName])
   }
   this._registerNext(target, sortedPlugins, cb)
-}
+})
 
 module.exports = Remi
