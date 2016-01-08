@@ -8,10 +8,13 @@ function registerNext(target, plugins, cb) {
   if (!plugin) {
     return cb()
   }
+
   target.plugins = target.plugins || {}
   target.plugins[plugin.name] = {}
+
   let pluginTarget = merge({}, target)
   pluginTarget.root = target
+
   pluginTarget.expose = function(key, value) {
     if (typeof key === 'string') {
       target.plugins[plugin.name][key] = value
@@ -19,6 +22,7 @@ function registerNext(target, plugins, cb) {
     }
     merge(target.plugins[plugin.name], key)
   }
+
   pluginTarget.decorate = function(prop, method) {
     let extention
     if (typeof prop === 'string') {
@@ -33,6 +37,7 @@ function registerNext(target, plugins, cb) {
     merge(pluginTarget, extention)
     merge(target, extention)
   }
+
   plugin.register(pluginTarget, plugin.options, function(err) {
     if (err) {
       return cb(err)
