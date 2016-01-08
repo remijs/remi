@@ -315,6 +315,9 @@ describe('plugin context', function() {
       expect(app.foo).to.exist
       expect(app.bar).to.exist
       expect(app.protoFn).to.exist
+      expect(app.root.foo).to.exist
+      expect(app.root.bar).to.exist
+      expect(app.root.protoFn).to.exist
       return next()
     }
     plugin.attributes = {
@@ -330,6 +333,42 @@ describe('plugin context', function() {
       return 2
     }
     new Remi().register(app, plugin, function(err) {
+      expect(err).to.not.exist
+      done()
+    })
+  })
+
+  it('should share the value in root', function(done) {
+    function plugin1(app, options, next) {
+      app.root.foo = 1
+      return next()
+    }
+    plugin1.attributes = {
+      name: 'plugin1',
+      version: '0.0.0',
+    }
+    function plugin2(app, options, next) {
+      expect(app.foo).to.eq(1)
+      expect(app.root.foo).to.eq(1)
+      return next()
+    }
+    plugin2.attributes = {
+      name: 'plugin2',
+      version: '0.1.0',
+    }
+
+    let app = {}
+    let plugins = [
+      {
+        register: plugin1,
+        options: {foo: 1},
+      },
+      {
+        register: plugin2,
+      },
+    ]
+
+    new Remi().register(app, plugins, function(err) {
       expect(err).to.not.exist
       done()
     })
