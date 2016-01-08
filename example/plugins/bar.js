@@ -1,14 +1,14 @@
-'use strict';
+'use strict'
 
 module.exports = function(hub, options, next) {
-  for (var i = 0; i < options.sayTimes; i++) {
-    console.log('Foo says: ' + hub.fooSays);
+  for (let i = 0; i < options.sayTimes; i++) {
+    console.log('Foo says: ' + hub.fooSays)
   }
-  next();
-};
+  next()
+}
 
 module.exports.attributes = {
   name: 'bar',
   version: '0.0.0',
-  dependencies: ['foo']
-};
+  dependencies: ['foo'],
+}

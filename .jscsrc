@@ -1,19 +1,50 @@
 {
-    "preset": "google",
-    "fileExtensions": [".js", "jscs"],
+  "preset": "google",
+  "fileExtensions": [".js", "jscs"],
 
-    "requireParenthesesAroundIIFE": true,
-    "maximumLineLength": 120,
-    "validateLineBreaks": "LF",
-    "validateIndentation": 2,
+  "requireParenthesesAroundIIFE": true,
+  "maximumLineLength": 120,
+  "validateLineBreaks": "LF",
+  "validateIndentation": 2,
 
-    "disallowKeywords": ["with"],
-    "disallowSpacesInsideObjectBrackets": null,
-    "disallowImplicitTypeConversion": ["string"],
+  "disallowKeywords": ["with", "else"],
+  "disallowSpacesInsideObjectBrackets": null,
+  "disallowImplicitTypeConversion": ["string"],
 
-    "excludeFiles": [
-        "test/data/**"
-    ],
+  "safeContextKeyword": "_this",
 
-    "requirePaddingNewLinesAfterUseStrict": true
+  "excludeFiles": [
+    "test/data/**"
+  ],
+
+  "requirePaddingNewLinesAfterUseStrict": true,
+  "requireCurlyBraces": [
+    "do"
+  ],
+
+  "requireTrailingComma": {
+    "ignoreSingleLine": true
+  },
+
+  "disallowYodaConditions": true,
+
+  "requireFunctionDeclarations": true,
+
+  "disallowNestedTernaries": true,
+
+  "disallowOperatorBeforeLineBreak": ["."],
+
+  "disallowParenthesesAroundArrowParam": true,
+
+  "disallowVar": true,
+
+  "maximumNumberOfLines": 100,
+
+  "requireAnonymousFunctions": {
+    "allExcept": ["declarations"]
+  },
+
+  "requireEarlyReturn": true,
+
+  "requireSemicolons": false
 }
