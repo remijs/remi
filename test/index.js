@@ -39,24 +39,6 @@ describe('register-plugin', function() {
     })
   })
 
-  it('registers plugin with plugin and shared options', function(done) {
-    function test(app, options, next) {
-      expect(options.something).to.be.true
-      expect(options.somethingShared).to.be.true
-      return next()
-    }
-    test.attributes = {
-      name: 'test',
-      version: '0.0.0',
-    }
-
-    let sharedOpts = {somethingShared: true}
-    new Remi().register({}, { register: test, options: { something: true } }, sharedOpts, function(err) {
-      expect(err).to.not.exist
-      done()
-    })
-  })
-
   it('throws error if dependent plugin not present', function(done) {
     function test(app, options, next) {
       expect(options.something).to.be.true
@@ -348,6 +330,22 @@ describe('plugin context', function() {
       return 2
     }
     new Remi().register(app, plugin, function(err) {
+      expect(err).to.not.exist
+      done()
+    })
+  })
+})
+
+describe('remi extensions', function() {
+  it('should get options', function(done) {
+    function extension(remi, options) {
+      expect(options.foo).to.eq('bar')
+    }
+
+    let sharedOpts = {somethingShared: true}
+    new Remi({
+      extensions: [extension],
+    }).register({}, [], {foo: 'bar'}, function(err) {
       expect(err).to.not.exist
       done()
     })

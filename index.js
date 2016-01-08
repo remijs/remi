@@ -13,8 +13,6 @@ function Remi(opts) {
   this._extensions = opts.extensions || []
 
   magicHook(this, ['createPlugin'])
-
-  this._extensions.forEach(ext => ext(this))
 }
 
 Remi.prototype.createPlugin = function(target) {
@@ -37,15 +35,15 @@ Remi.prototype._registerNext = function(target, plugins, cb, prevPluginTarget) {
   })
 }
 
-Remi.prototype.register = thenify(function(target, plugins/*, sharedOpts, cb*/) {
+Remi.prototype.register = thenify(function(target, plugins/*, extOpts, cb*/) {
   let cb
-  let sharedOpts
+  let extOpts
   if (arguments.length === 3) {
     cb = arguments[2]
-    sharedOpts = {}
+    extOpts = {}
   } else {
     cb = arguments[3]
-    sharedOpts = arguments[2]
+    extOpts = arguments[2]
   }
   plugins = this._corePlugins.concat(plugins)
 
@@ -69,7 +67,7 @@ Remi.prototype.register = thenify(function(target, plugins/*, sharedOpts, cb*/) 
       register: plugin.register,
       name: attributes.name || attributes.pkg.name,
       version: attributes.version || attributes.pkg && attributes.pkg.version,
-      options: merge({}, plugin.options, sharedOpts),
+      options: merge({}, plugin.options),
       dependencies: attributes.dependencies || [],
       before: attributes.before || [],
     }
@@ -119,6 +117,8 @@ Remi.prototype.register = thenify(function(target, plugins/*, sharedOpts, cb*/) 
     }
     sortedPlugins.push(target.registrations[pluginName])
   }
+
+  this._extensions.forEach(ext => ext(this, extOpts))
   this._registerNext(target, sortedPlugins, cb)
 })
 
