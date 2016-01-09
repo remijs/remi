@@ -1,12 +1,13 @@
 'use strict'
 
-const registerPlugins = require('../')
+const Remi = require('../')
 
 function Hub() {
+  this._remi = new Remi()
 }
 
 Hub.prototype.register = function(plugins, cb) {
-  registerPlugins(this, plugins, cb)
+  this._remi.register(this, plugins, cb)
 }
 
 let hub = new Hub()

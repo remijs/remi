@@ -73,20 +73,21 @@ The `app` object is a reference to the `app` your plugin is being loaded in.
 ## Loading a plugin
 
 Plugins can be loaded one at a time, or as a group in an array, by the
-`registerPlugin()` method, for example:
+`register()` method of a `Remi` object, for example:
 
 ```js
-var registerPlugin = require('register-plugin');
+const Remi = require('remi')
 
 // load one plugin
-registerPlugin(app, require('myplugin'), function(err) {
+let remi = new Remi()
+remi.register(app, require('myplugin'), function(err) {
   if (err) {
     console.error('Failed to load plugin:', err);
   }
 });
 
 // load multiple plugins
-registerPlugin(app, [require('myplugin'), require('yourplugin')], function(err) {
+remi.register(app, [require('myplugin'), require('yourplugin')], function(err) {
   if (err) {
     console.error('Failed to load a plugin:', err);
   }
@@ -96,7 +97,7 @@ registerPlugin(app, [require('myplugin'), require('yourplugin')], function(err) 
 To pass options to your plugin, we instead create an object with `register` and `options` keys, such as:
 
 ```js
-registerPlugin(app, {
+remi.register(app, {
   register: require('myplugin'),
   options: {
     message: 'hello'
@@ -108,7 +109,7 @@ registerPlugin(app, {
 These objects can also be passed in an array:
 
 ```js
-registerPlugin(app, [{
+remi.register(app, [{
   register: require('plugin1'),
   options: {}
 }, {
@@ -187,7 +188,7 @@ plugin.attributes = {
   version: '1.0.0'
 };
 
-registerPlugin(app, [{
+remi.register(app, [{
   register: plugin,
   options: {
     bar: 'bar'
@@ -217,7 +218,7 @@ barPlugin.attributes = {
   version: '1.0.0'
 };
 
-registerPlugin(app, [fooPlugin, barPlugin, qazPlugin], {
+remi.register(app, [fooPlugin, barPlugin, qazPlugin], {
   main: 'bar-plugin' /* the bar-plugin will be registered first */
 }, function (err) {
 });
