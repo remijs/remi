@@ -25,7 +25,7 @@ Remi.prototype._registerNext = function(target, plugins, cb, prevPluginTarget) {
     return cb(null, prevPluginTarget)
   }
 
-  let pluginTarget = this.createPlugin(merge({}, target), plugin)
+  let pluginTarget = this.createPlugin(merge({root: target}, target), plugin)
   pluginTarget.root = target
 
   plugin.register(merge({}, pluginTarget), plugin.options, err => {
