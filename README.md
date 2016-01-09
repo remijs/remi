@@ -1,4 +1,4 @@
-# register-plugin
+# remi
 
 A plugin registrator inspired by [hapi's plugins](http://hapijs.com/tutorials/plugins).
 
@@ -13,7 +13,7 @@ business logic, and reusable utilities.
 ## Installation
 
 ```
-npm install --save register-plugin
+npm install --save remi
 ```
 
 
@@ -27,28 +27,28 @@ additional information about the plugin, such as name and version.
 A very simple plugin looks like:
 
 ```js
-var myPlugin = {
+let myPlugin = {
   register: function(app, options, next) {
-    next();
+    next()
   }
-};
+}
 
 myPlugin.register.attributes = {
   name: 'myPlugin',
-  version: '1.0.0'
-};
+  version: '1.0.0',
+}
 ```
 
 Or when written as an external module:
 
 ```js
 module.exports = function(app, options, next) {
-  next();
-};
+  next()
+}
 
 module.exports.attributes = {
-  pkg: require('./package.json')
-};
+  pkg: require('./package.json'),
+}
 ```
 
 Note that in the first example, we set the `name` and `version` attributes specifically,
@@ -103,7 +103,7 @@ remi.register(app, {
     message: 'hello'
   }
 }, function(err) {
-});
+})
 ```
 
 These objects can also be passed in an array:
@@ -116,7 +116,7 @@ remi.register(app, [{
   register: require('plugin2'),
   options: {}
 }], function(err) {
-});
+})
 ```
 
 
@@ -128,16 +128,16 @@ The `.decorate` method can be used to extend the app's API.
 function plugin(app, opts, next) {
   /* The app can be decorated by one property at once */
   app.decorate('foo', function() {
-    console.log('foo');
+    console.log('foo')
   });
 
   /* or by several properties at once */
   app.decorate({
     bar: 23,
-    qax: 54
+    qax: 54,
   });
 
-  next();
+  next()
 }
 ```
 
@@ -151,9 +151,9 @@ Used within a plugin to expose a property via app.plugins[name] where:
 
 ```js
 exports.register = function(app, opts, next) {
-  app.expose('util', function() { console.log('something'); });
-  return next();
-};
+  app.expose('util', function() { console.log('something'); })
+  return next()
+}
 ```
 
 
@@ -165,9 +165,9 @@ Merges a shallow copy of an object into to the existing content of `server.plugi
 
 ```js
 exports.register = function(app, opts, next) {
-  app.expose({ util: function() { console.log('something'); } });
-  return next();
-};
+  app.expose({ util: function() { console.log('something') } })
+  return next()
+}
 ```
 
 
@@ -180,23 +180,23 @@ merge with the plugin's options and passed to the register method.
 function plugin(app, opts, next) {
   /* opts will equal {bar: 'bar', foo: 'foo'} */
 
-  next();
+  next()
 }
 
 plugin.attributes = {
   name: 'plugin',
-  version: '1.0.0'
-};
+  version: '1.0.0',
+}
 
 remi.register(app, [{
   register: plugin,
   options: {
-    bar: 'bar'
-  }
+    bar: 'bar',
+  },
 }], {
-  foo: 'foo'
+  foo: 'foo',
 }, function (err) {
-});
+})
 ```
 
 
@@ -208,20 +208,20 @@ dependencies.
 
 ```js
 function barPlugin(app, opts, next) {
-  console.log('Hello world!');
+  console.log('Hello world!')
 
-  next();
+  next()
 }
 
 barPlugin.attributes = {
   name: 'bar-plugin',
-  version: '1.0.0'
+  version: '1.0.0',
 };
 
 remi.register(app, [fooPlugin, barPlugin, qazPlugin], {
   main: 'bar-plugin' /* the bar-plugin will be registered first */
 }, function (err) {
-});
+})
 ```
 
 
