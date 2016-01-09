@@ -5,9 +5,9 @@ A plugin registrator inspired by [hapi's plugins](http://hapijs.com/tutorials/pl
 Plugins allow you to very easily break your application up into isolated pieces of
 business logic, and reusable utilities.
 
-[![Dependency Status](https://david-dm.org/zkochan/register-plugin/status.svg?style=flat)](https://david-dm.org/zkochan/register-plugin)
-[![Build Status](https://travis-ci.org/zkochan/register-plugin.svg?branch=master)](https://travis-ci.org/zkochan/register-plugin)
-[![npm version](https://badge.fury.io/js/register-plugin.svg)](http://badge.fury.io/js/register-plugin)
+[![Dependency Status](https://david-dm.org/zkochan/remi/status.svg?style=flat)](https://david-dm.org/zkochan/remi)
+[![Build Status](https://travis-ci.org/zkochan/remi.svg?branch=master)](https://travis-ci.org/zkochan/remi)
+[![npm version](https://badge.fury.io/js/remi.svg)](http://badge.fury.io/js/remi)
 
 
 ## Installation
