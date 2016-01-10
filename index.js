@@ -19,20 +19,18 @@ Remi.prototype.createPlugin = function(target) {
   return target
 }
 
-Remi.prototype._registerNext = function(target, plugins, cb, prevPluginTarget) {
+Remi.prototype._registerNext = function(target, plugins, cb) {
   let plugin = plugins.shift()
-  if (!plugin) {
-    return cb(null, prevPluginTarget)
-  }
+
+  if (!plugin) return cb(null)
 
   let pluginTarget = this.createPlugin(merge({root: target}, target), plugin)
   pluginTarget.root = target
 
   plugin.register(merge({}, pluginTarget), plugin.options, err => {
-    if (err) {
-      return cb(err)
-    }
-    this._registerNext(target, plugins, cb, pluginTarget)
+    if (err) return cb(err)
+
+    this._registerNext(target, plugins, cb)
   })
 }
 

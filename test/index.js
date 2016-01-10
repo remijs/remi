@@ -145,7 +145,7 @@ describe('register-plugin', function() {
     })
   })
 
-  it('should return a promise', function(done) {
+  it('should return a promise', function() {
     let plugin = sinon.spy(function(app, options, next) {
       return next()
     })
@@ -159,12 +159,11 @@ describe('register-plugin', function() {
     })
 
     let target = {}
-    remi
+    return remi
       .register(target, [plugin])
-      .then(target => remi.register(target, [plugin]))
-      .then(function() {
+      .then(() => remi.register(target, [plugin]))
+      .then(() => {
         expect(plugin).to.have.been.calledOnce
-        done()
       })
   })
 
