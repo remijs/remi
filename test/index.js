@@ -1,5 +1,4 @@
 'use strict'
-
 const chai = require('chai')
 const expect = chai.expect
 const sinon = require('sinon')
@@ -8,7 +7,7 @@ chai.use(sinonChai)
 
 const Remi = require('../')
 
-describe('register-plugin', function() {
+describe('Remi', function() {
   it('should register plugin with no version', function(done) {
     function test(app, options, next) {
       return next()
@@ -18,6 +17,35 @@ describe('register-plugin', function() {
     }
 
     new Remi().register({}, { register: test }, function(err) {
+      expect(err).to.not.exist
+      done()
+    })
+  })
+
+  it('should register synchronous plugin', function(done) {
+    function test(app, options) {
+    }
+    test.attributes = {
+      name: 'test',
+    }
+
+    let remi = new Remi()
+    remi.register({}, { register: test }, function(err) {
+      expect(err).to.not.exist
+      done()
+    })
+  })
+
+  it('should register plugin that returns a promise', function(done) {
+    function test(app, options) {
+      return Promise.resolve()
+    }
+    test.attributes = {
+      name: 'test',
+    }
+
+    let remi = new Remi()
+    remi.register({}, { register: test }, function(err) {
       expect(err).to.not.exist
       done()
     })

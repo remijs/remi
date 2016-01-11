@@ -1,9 +1,9 @@
 'use strict'
-
 const TopoSort = require('topo-sort')
 const merge = require('merge')
 const magicHook = require('magic-hook')
 const thenify = require('thenify').withCallback
+const runAsync = require('run-async-cb')
 
 function Remi(opts) {
   opts = opts || {}
@@ -27,11 +27,11 @@ Remi.prototype._registerNext = function(target, plugins, cb) {
   let pluginTarget = this.createPlugin(merge({root: target}, target), plugin)
   pluginTarget.root = target
 
-  plugin.register(merge({}, pluginTarget), plugin.options, err => {
+  runAsync({fixedLength: true}, plugin.register, err => {
     if (err) return cb(err)
 
     this._registerNext(target, plugins, cb)
-  })
+  })(merge({}, pluginTarget), plugin.options)
 }
 
 Remi.prototype.register = thenify(function(target, plugins/*, extOpts, cb*/) {
