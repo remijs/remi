@@ -8,6 +8,7 @@ business logic, and reusable utilities.
 [![Dependency Status](https://david-dm.org/zkochan/remi/status.svg?style=flat)](https://david-dm.org/zkochan/remi)
 [![Build Status](https://travis-ci.org/zkochan/remi.svg?branch=master)](https://travis-ci.org/zkochan/remi)
 [![npm version](https://badge.fury.io/js/remi.svg)](http://badge.fury.io/js/remi)
+[![Coverage Status](https://coveralls.io/repos/zkochan/remi/badge.svg?branch=master&service=github)](https://coveralls.io/github/zkochan/remi?branch=master)
 
 
 ## Installation
