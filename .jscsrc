@@ -17,7 +17,7 @@
     "test/data/**"
   ],
 
-  "requirePaddingNewLinesAfterUseStrict": true,
+  "disallowPaddingNewLinesAfterUseStrict": true,
   "requireCurlyBraces": [
     "do"
   ],
