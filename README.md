@@ -1,5 +1,7 @@
 # register-plugin
 
+**DEPRECATION NOTICE!** this module is not maintained anymore. Use [remi](https://www.npmjs.com/package/remi) instead.
+
 A plugin registrator inspired by [hapi's plugins](http://hapijs.com/tutorials/plugins).
 
 Plugins allow you to very easily break your application up into isolated pieces of
