@@ -29,7 +29,7 @@ A very simple plugin looks like:
 
 ```js
 let myPlugin = {
-  register: function(app, options, next) {
+  register(app, options, next) {
     next()
   }
 }
@@ -117,86 +117,6 @@ remi.register(app, [{
   register: require('plugin2'),
   options: {}
 }], function(err) {
-})
-```
-
-
-## Decorating the API
-
-The `.decorate` method can be used to extend the app's API.
-
-```js
-function plugin(app, opts, next) {
-  /* The app can be decorated by one property at once */
-  app.decorate('foo', function() {
-    console.log('foo')
-  });
-
-  /* or by several properties at once */
-  app.decorate({
-    bar: 23,
-    qax: 54,
-  });
-
-  next()
-}
-```
-
-
-## app.expose(key, value)
-
-Used within a plugin to expose a property via app.plugins[name] where:
-
-* `key` - the key assigned (`server.plugins[name][key]`).
-* `value` - the value assigned.
-
-```js
-exports.register = function(app, opts, next) {
-  app.expose('util', function() { console.log('something'); })
-  return next()
-}
-```
-
-
-## server.expose(obj)
-
-Merges a shallow copy of an object into to the existing content of `server.plugins[name]` where:
-
-* `obj` - the object merged into the exposed properties container.
-
-```js
-exports.register = function(app, opts, next) {
-  app.expose({ util: function() { console.log('something') } })
-  return next()
-}
-```
-
-
-## Options can be shared
-
-You can pass a third optional `shared options` parameter. The shared options are
-merge with the plugin's options and passed to the register method.
-
-```js
-function plugin(app, opts, next) {
-  /* opts will equal {bar: 'bar', foo: 'foo'} */
-
-  next()
-}
-
-plugin.attributes = {
-  name: 'plugin',
-  version: '1.0.0',
-}
-
-remi.register(app, [{
-  register: plugin,
-  options: {
-    bar: 'bar',
-  },
-}], {
-  foo: 'foo',
-}, function (err) {
 })
 ```
 
