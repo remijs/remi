@@ -44,7 +44,7 @@ describe('Remi', function() {
       })
   })
 
-  it('registers plugin with options', function() {
+  it('should register plugin with options', function() {
     let register = sinon.spy()
     let plugin = plugiator.anonymous(register)
     let pluginOpts = { something: true }
@@ -58,7 +58,7 @@ describe('Remi', function() {
       })
   })
 
-  it('throws error if dependent plugin not present', function(done) {
+  it('should throw error if dependent plugin not present', function(done) {
     let plugin = plugiator.noop({
       name: 'plugin1',
       version: '0.0.0',
@@ -86,7 +86,7 @@ describe('Remi', function() {
     })
   })
 
-  it('register plugins in correct order when `before` specified', function() {
+  it('should register plugins in correct order when `before` specified', function() {
     let plugin2 = sinon.spy(plugiator.noop('plugin2'))
     let plugin1 = sinon.spy(plugiator.noop({
       name: 'plugin1',
@@ -102,7 +102,7 @@ describe('Remi', function() {
       })
   })
 
-  it('exposes the registrations object', function(done) {
+  it('should expose the registrations object', function(done) {
     let plugin1 = plugiator.noop({
       name: 'plugin1',
       version: '0.0.0',
@@ -122,7 +122,8 @@ describe('Remi', function() {
         register: plugin2,
       },
     ]
-    new Remi().register(app, plugins, function(err) {
+    let remi = new Remi()
+    remi.register(app, plugins, function(err) {
       expect(err).to.not.exist
 
       expect(app.registrations).to.not.be.undefined
