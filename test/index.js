@@ -9,11 +9,17 @@ const Remi = require('../')
 chai.use(sinonChai)
 
 describe('Remi', function() {
+  let app
+  let remi
+
+  beforeEach(function() {
+    app = {}
+    remi = new Remi()
+  })
+
   it('should register plugin with no version', function() {
     let plugin = plugiator.anonymous((app, options, next) => next())
 
-    let remi = new Remi()
-    let app = {}
     return remi
       .register(app, { register: plugin })
       .then(() => {
@@ -24,8 +30,6 @@ describe('Remi', function() {
   it('should register synchronous plugin', function() {
     let plugin = plugiator.anonymous((app, opts) => {})
 
-    let remi = new Remi()
-    let app = {}
     return remi
       .register(app, { register: plugin })
       .then(() => {
@@ -36,8 +40,6 @@ describe('Remi', function() {
   it('should register plugin that returns a promise', function() {
     let plugin = plugiator.anonymous((app, opts) => Promise.resolve())
 
-    let remi = new Remi()
-    let app = {}
     return remi.register(app, { register: plugin })
       .then(() => {
         expect(app.registrations[plugin.attributes.name]).to.exist
@@ -49,9 +51,8 @@ describe('Remi', function() {
     let plugin = plugiator.anonymous(register)
     let pluginOpts = { something: true }
 
-    let remi = new Remi()
     return remi
-      .register({}, { register: plugin, options: pluginOpts })
+      .register(app, { register: plugin, options: pluginOpts })
       .then(() => {
         expect(register).to.have.been.calledOnce
         expect(register.args[0][1]).to.eql(pluginOpts)
@@ -65,7 +66,6 @@ describe('Remi', function() {
       dependencies: ['foo'],
     })
 
-    let remi = new Remi()
     remi.register({}, plugin, function(err) {
       expect(err).to.be.an.instanceof(Error)
       done()
@@ -94,9 +94,8 @@ describe('Remi', function() {
       before: ['plugin2'],
     }))
 
-    let remi = new Remi()
     return remi
-      .register({}, [plugin2, plugin1])
+      .register(app, [plugin2, plugin1])
       .then(() => {
         expect(plugin1).to.have.been.calledBefore(plugin2)
       })
@@ -112,7 +111,6 @@ describe('Remi', function() {
       version: '0.1.0',
     })
 
-    let app = {}
     let plugins = [
       {
         register: plugin1,
@@ -122,7 +120,6 @@ describe('Remi', function() {
         register: plugin2,
       },
     ]
-    let remi = new Remi()
     remi.register(app, plugins, function(err) {
       expect(err).to.not.exist
 
@@ -147,9 +144,8 @@ describe('Remi', function() {
       corePlugins: [plugin],
     })
 
-    let target = {}
-    return remi.register(target, [plugin])
-      .then(() => remi.register(target, [plugin]))
+    return remi.register(app, [plugin])
+      .then(() => remi.register(app, [plugin]))
       .then(() => expect(plugin).to.have.been.calledOnce)
   })
 
@@ -160,10 +156,9 @@ describe('Remi', function() {
       corePlugins: [plugin],
     })
 
-    let target = {}
     return remi
-      .register(target, [plugin])
-      .then(() => remi.register(target, [plugin]))
+      .register(app, [plugin])
+      .then(() => remi.register(app, [plugin]))
       .then(() => expect(plugin).to.have.been.calledOnce)
   })
 
@@ -178,13 +173,10 @@ describe('Remi', function() {
       dependencies: ['plugin1'],
     })
 
-    let remi = new Remi({})
-
-    let target = {}
-    remi.register(target, [plugin1], function(err) {
+    remi.register(app, [plugin1], function(err) {
       expect(err).to.not.exist
 
-      remi.register(target, [plugin2], function(err) {
+      remi.register(app, [plugin2], function(err) {
         expect(err).to.not.exist
         done()
       })
