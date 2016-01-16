@@ -72,6 +72,20 @@ describe('Remi', function() {
     })
   })
 
+  it('should throw error if one the plugins didn\'t finished registering in time', function(done) {
+    let remi = new Remi({
+      registrationTimeout: 10,
+    })
+    remi.register({}, [
+      {
+        register: plugiator.anonymous((server, opts, next) => undefined),
+      },
+    ], err => {
+      expect(err).to.be.an.instanceof(Error)
+      done()
+    })
+  })
+
   it('register plugins in correct order when `before` specified', function() {
     let plugin2 = sinon.spy(plugiator.noop('plugin2'))
     let plugin1 = sinon.spy(plugiator.noop({

@@ -4,11 +4,13 @@ const merge = require('merge')
 const magicHook = require('magic-hook')
 const thenify = require('thenify').withCallback
 const runAsync = require('run-async')
+const kamikaze = require('kamikaze')
 
 function Remi(opts) {
   opts = opts || {}
 
   this._main = opts.main
+  this._registrationTimeout = opts.registrationTimeout || 5000 // 5 seconds
   this._corePlugins = opts.corePlugins || []
   this._extensions = opts.extensions || []
 
@@ -27,11 +29,11 @@ Remi.prototype._registerNext = function(target, plugins, cb) {
   let pluginTarget = this.createPlugin(merge({root: target}, target), plugin)
   pluginTarget.root = target
 
-  runAsync.cb(plugin.register, err => {
+  runAsync.cb(plugin.register, kamikaze(this._registrationTimeout, err => {
     if (err) return cb(err)
 
     this._registerNext(target, plugins, cb)
-  })(merge({}, pluginTarget), plugin.options)
+  }))(merge({}, pluginTarget), plugin.options)
 }
 
 Remi.prototype.register = thenify(function(target, plugins/*, extOpts, cb*/) {

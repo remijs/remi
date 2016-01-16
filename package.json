@@ -36,6 +36,7 @@
     "registry": "http://registry.npmjs.org"
   },
   "dependencies": {
+    "kamikaze": "^1.0.0",
     "magic-hook": "^0.1.1",
     "merge": "^1.2.0",
     "run-async": "^2.1.0",
