@@ -19,7 +19,6 @@
     "register"
   ],
   "files": [
-    "lib",
     "index.js"
   ],
   "author": {
