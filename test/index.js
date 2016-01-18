@@ -182,6 +182,13 @@ describe('Remi', function() {
       })
     })
   })
+
+  it('should throw error if no register method passed', function(done) {
+    remi.register(app, { attributes: {name: 'foo'} }, function(err) {
+      expect(err).to.be.an.instanceof(Error, 'Plugin missing a register method')
+      done()
+    })
+  })
 })
 
 describe('main plugin', function() {

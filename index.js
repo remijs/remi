@@ -57,6 +57,8 @@ Remi.prototype.register = thenify(function(target, plugins/*, extOpts, cb*/) {
     if (typeof plugin === 'function' && !plugin.register) {
       /* plugin is register() function */
       plugin = { register: plugin }
+    } else if (!plugin.register) {
+      return cb(new Error('Plugin missing a register method'))
     }
 
     if (plugin.register.register) { /* Required plugin */
