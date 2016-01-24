@@ -30,7 +30,12 @@ Remi.prototype._registerNext = function(target, plugins, cb) {
   pluginTarget.root = target
 
   runAsync.cb(plugin.register, kamikaze(this._registrationTimeout, err => {
-    if (err) return cb(err)
+    if (err) {
+      let wrapperErr = new Error('error during registering ' + plugin.name +
+        '. ' + err)
+      wrapperErr.internalError = err
+      return cb(wrapperErr)
+    }
 
     this._registerNext(target, plugins, cb)
   }))(merge({}, pluginTarget), plugin.options)
