@@ -138,7 +138,8 @@ describe('Remi', function() {
   })
 
   it('should register plugin only once', function() {
-    let plugin = sinon.spy(plugiator.noop())
+    //let plugin = sinon.spy(plugiator.noop())
+    let plugin = sinon.spy(plugiator.anonymous((app, opts) => console.log(1)))
 
     let remi = new Remi({
       corePlugins: [plugin],
@@ -317,10 +318,12 @@ describe('remi extensions', function() {
       expect(options.foo).to.eq('bar')
     }
 
-    let sharedOpts = {somethingShared: true}
     let remi = new Remi({
-      extensions: [extension],
+      extensions: [{
+        extension,
+        options: { foo: 'bar' },
+      },],
     })
-    return remi.register({}, [], {foo: 'bar'})
+    return remi.register({}, [])
   })
 })

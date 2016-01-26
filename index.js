@@ -12,9 +12,12 @@ function Remi(opts) {
   this._main = opts.main
   this._registrationTimeout = opts.registrationTimeout || 5000 // 5 seconds
   this._corePlugins = opts.corePlugins || []
-  this._extensions = opts.extensions || []
 
   magicHook(this, ['createPlugin'])
+
+  let extensions = opts.extensions || []
+  extensions
+    .forEach(ext => ext.extension(this, ext.options || {}))
 }
 
 Remi.prototype.createPlugin = function(target) {
@@ -126,7 +129,6 @@ Remi.prototype.register = thenify(function(target, plugins/*, extOpts, cb*/) {
     sortedPlugins.push(target.registrations[pluginName])
   }
 
-  this._extensions.forEach(ext => ext(this, extOpts))
   this._registerNext(target, sortedPlugins, cb)
 })
 
