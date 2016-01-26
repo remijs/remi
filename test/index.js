@@ -260,6 +260,25 @@ describe('main plugin', function() {
     })
   })
 
+  it('should throw promise exception if has dependencies', function(done) {
+    let plugin = sinon.spy(plugiator.noop('plugin'))
+    let mainPlugin = sinon.spy(plugiator.noop({
+      name: 'main',
+      version: '0.0.0',
+      dependencies: ['plugin'],
+    }))
+
+    let remi = new Remi({
+      main: 'main',
+      corePlugins: [mainPlugin],
+    })
+
+    remi.register({}, [plugin]).catch(err => {
+      expect(err).to.be.not.undefined
+      done()
+    })
+  })
+
   it('should throw exception if main plugin not passed', function(done) {
     let plugin = plugiator.noop()
 
