@@ -98,7 +98,7 @@ describe('Remi', function() {
       dependencies: ['foo'],
     })
 
-    remi.register({}, plugin, function(err) {
+    remi.register({}, plugin).catch(err => {
       expect(err).to.be.an.instanceof(Error)
       done()
     })
@@ -108,14 +108,16 @@ describe('Remi', function() {
     let remi = new Remi({
       registrationTimeout: 10,
     })
-    remi.register({}, [
-      {
-        register: plugiator.anonymous((server, opts, next) => undefined),
-      },
-    ], err => {
-      expect(err).to.be.an.instanceof(Error)
-      done()
-    })
+    remi
+      .register({}, [
+        {
+          register: plugiator.anonymous((server, opts, next) => undefined),
+        },
+      ])
+      .catch(err => {
+        expect(err).to.be.an.instanceof(Error)
+        done()
+      })
   })
 
   it('should register plugins in correct order when `before` specified', function() {
@@ -133,7 +135,7 @@ describe('Remi', function() {
       })
   })
 
-  it('should expose the registrations object', function(done) {
+  it('should expose the registrations object', function() {
     let plugin1 = plugiator.noop({
       name: 'plugin1',
       version: '0.0.0',
@@ -152,9 +154,7 @@ describe('Remi', function() {
         register: plugin2,
       },
     ]
-    remi.register(app, plugins, function(err) {
-      expect(err).to.not.exist
-
+    return remi.register(app, plugins).then(() => {
       expect(app.registrations).to.not.be.undefined
       expect(app.registrations.plugin1).to.not.be.undefined
       expect(app.registrations.plugin1.name).to.eq('plugin1')
@@ -164,8 +164,6 @@ describe('Remi', function() {
       expect(app.registrations.plugin2).to.not.be.undefined
       expect(app.registrations.plugin2.name).to.eq('plugin2')
       expect(app.registrations.plugin2.version).to.eq('0.1.0')
-
-      done()
     })
   })
 
@@ -194,7 +192,7 @@ describe('Remi', function() {
       .then(() => expect(plugin).to.have.been.calledOnce)
   })
 
-  it('should not return an error if dependency was already registered', function(done) {
+  it('should not return an error if dependency was already registered', function() {
     let plugin1 = plugiator.noop({
       name: 'plugin1',
       version: '0.0.0',
@@ -205,26 +203,22 @@ describe('Remi', function() {
       dependencies: ['plugin1'],
     })
 
-    remi.register(app, [plugin1], function(err) {
-      expect(err).to.not.exist
-
-      remi.register(app, [plugin2], function(err) {
-        expect(err).to.not.exist
-        done()
-      })
-    })
+    return remi.register(app, [plugin1])
+      .then(() => remi.register(app, [plugin2]))
   })
 
   it('should throw error if no register method passed', function(done) {
-    remi.register(app, { attributes: {name: 'foo'} }, function(err) {
-      expect(err).to.be.an.instanceof(Error, 'Plugin missing a register method')
-      done()
-    })
+    remi
+      .register(app, { attributes: {name: 'foo'} })
+      .catch(err => {
+        expect(err).to.be.an.instanceof(Error, 'Plugin missing a register method')
+        done()
+      })
   })
 })
 
 describe('main plugin', function() {
-  it('should be registered first', function(done) {
+  it('should be registered first', function() {
     let plugin = sinon.spy(plugiator.noop())
     let mainPlugin = sinon.spy(plugiator.noop('main'))
 
@@ -233,34 +227,14 @@ describe('main plugin', function() {
       corePlugins: [mainPlugin],
     })
 
-    remi.register({}, [plugin], function(err) {
-      expect(err).to.not.exist
-      expect(mainPlugin).to.have.been.calledOnce
-      expect(mainPlugin).to.have.been.calledBefore(plugin)
-      done()
-    })
+    return remi.register({}, [plugin])
+      .then(() => {
+        expect(mainPlugin).to.have.been.calledOnce
+        expect(mainPlugin).to.have.been.calledBefore(plugin)
+      })
   })
 
   it('should throw exception if has dependencies', function(done) {
-    let plugin = sinon.spy(plugiator.noop('plugin'))
-    let mainPlugin = sinon.spy(plugiator.noop({
-      name: 'main',
-      version: '0.0.0',
-      dependencies: ['plugin'],
-    }))
-
-    let remi = new Remi({
-      main: 'main',
-      corePlugins: [mainPlugin],
-    })
-
-    remi.register({}, [plugin], function(err) {
-      expect(err).to.be.not.undefined
-      done()
-    })
-  })
-
-  it('should throw promise exception if has dependencies', function(done) {
     let plugin = sinon.spy(plugiator.noop('plugin'))
     let mainPlugin = sinon.spy(plugiator.noop({
       name: 'main',
@@ -286,7 +260,7 @@ describe('main plugin', function() {
       main: 'main',
     })
 
-    remi.register({}, [plugin], function(err) {
+    remi.register({}, [plugin]).catch(err => {
       expect(err).to.be.not.undefined
       done()
     })

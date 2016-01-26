@@ -45,8 +45,7 @@ module.exports = class Remi {
       this._registerNext(target, plugins, cb)
     }))(merge({}, pluginTarget), plugin.options)
   }
-  register(target, plugins, cb) {
-    let deferred = promiseResolver.defer(cb)
+  register(target, plugins) {
     plugins = this._corePlugins.concat(plugins)
 
     target.registrations = target.registrations || {}
@@ -59,8 +58,7 @@ module.exports = class Remi {
         /* plugin is register() function */
         plugin = { register: plugin }
       } else if (!plugin.register) {
-        deferred.reject(new Error('Plugin missing a register method'))
-        return deferred.promise
+        return Promise.reject(new Error('Plugin missing a register method'))
       }
 
       if (plugin.register.register) { /* Required plugin */
@@ -86,13 +84,11 @@ module.exports = class Remi {
     let mainPlugin = target.registrations[this._main]
     if (this._main) {
       if (!mainPlugin) {
-        deferred.cb(new Error('main plugin called `' + this._main +
+        return Promise.reject(new Error('main plugin called `' + this._main +
           '` is missing'))
-        return deferred.promise
       }
       if (mainPlugin.dependencies.length > 0) {
-        deferred.reject(new Error('main plugin cannot have dependencies'))
-        return deferred.promise
+        return Promise.reject(new Error('main plugin cannot have dependencies'))
       }
     }
 
@@ -119,13 +115,13 @@ module.exports = class Remi {
     for (let i = 0; i < sortedPluginNames.length; i++) {
       let pluginName = sortedPluginNames[i]
       if (!target.registrations[pluginName]) {
-        deferred.reject(new Error('Plugin called ' + pluginName +
+        return Promise.reject(new Error('Plugin called ' + pluginName +
           ' required by dependencies but wasn\'t registered'))
-        return deferred.promise
       }
       sortedPlugins.push(target.registrations[pluginName])
     }
 
+    let deferred = promiseResolver.defer()
     this._registerNext(target, sortedPlugins, deferred.cb)
     return deferred.promise
   }
