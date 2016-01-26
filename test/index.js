@@ -27,6 +27,25 @@ describe('Remi', function() {
       })
   })
 
+  it('should register plugin with attributes from a package.json', function() {
+    let name = 'foo'
+    let version = '2.4.0'
+    let plugin = plugiator.create({
+      pkg: {
+        name,
+        version,
+      },
+    }, (app, options, next) => next())
+
+    return remi
+      .register(app, { register: plugin })
+      .then(() => {
+        expect(app.registrations[name]).to.exist
+        expect(app.registrations[name].name).to.eq(name)
+        expect(app.registrations[name].version).to.eq(version)
+      })
+  })
+
   it('should register synchronous plugin', function() {
     let plugin = plugiator.anonymous((app, opts) => {})
 
@@ -43,6 +62,19 @@ describe('Remi', function() {
     return remi.register(app, { register: plugin })
       .then(() => {
         expect(app.registrations[plugin.attributes.name]).to.exist
+      })
+  })
+
+  it('should register plugin that is passed as an object', function() {
+    let register = sinon.spy()
+    let plugin = {
+      register: plugiator.anonymous(register),
+    }
+
+    return remi
+      .register(app, { register: plugin })
+      .then(() => {
+        expect(register).to.have.been.calledOnce
       })
   })
 
@@ -138,8 +170,7 @@ describe('Remi', function() {
   })
 
   it('should register plugin only once', function() {
-    //let plugin = sinon.spy(plugiator.noop())
-    let plugin = sinon.spy(plugiator.anonymous((app, opts) => console.log(1)))
+    let plugin = sinon.spy(plugiator.noop())
 
     let remi = new Remi({
       corePlugins: [plugin],
@@ -314,9 +345,9 @@ describe('plugin context', function() {
 
 describe('remi extensions', function() {
   it('should get options', function() {
-    function extension(remi, options) {
-      expect(options.foo).to.eq('bar')
-    }
+    let extension = sinon.spy((remi, opts) => {
+      expect(opts.foo).to.eq('bar')
+    })
 
     let remi = new Remi({
       extensions: [{
@@ -324,6 +355,19 @@ describe('remi extensions', function() {
         options: { foo: 'bar' },
       },],
     })
-    return remi.register({}, [])
+    expect(extension).to.be.calledOnce
+  })
+
+  it('should never pass no options', function() {
+    let extension = sinon.spy((remi, opts) => {
+      expect(opts).to.eql({})
+    })
+
+    let remi = new Remi({
+      extensions: [{
+        extension,
+      },],
+    })
+    expect(extension).to.be.calledOnce
   })
 })
