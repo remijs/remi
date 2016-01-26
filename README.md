@@ -124,14 +124,12 @@ remi.register(app, [{
 ## Main plugin
 
 You can specify the plugin that should be registered first by passing its name
-through the `main` option of the shared options. The main plugin can't have any
+through the `main` option of the `Remi` class constructor options. The main plugin can't have any
 dependencies.
 
 ```js
-function barPlugin(app, opts, next) {
+function barPlugin(app, opts) {
   console.log('Hello world!')
-
-  next()
 }
 
 barPlugin.attributes = {
@@ -139,9 +137,10 @@ barPlugin.attributes = {
   version: '1.0.0',
 };
 
-remi.register(app, [fooPlugin, barPlugin, qazPlugin], {
+let remi = new Remi({
   main: 'bar-plugin' /* the bar-plugin will be registered first */
-}, function (err) {
+})
+remi.register(app, [fooPlugin, barPlugin, qazPlugin], function (err) {
 })
 ```
 
