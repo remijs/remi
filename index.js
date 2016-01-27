@@ -10,9 +10,7 @@ module.exports = class Remi {
   constructor(opts) {
     opts = opts || {}
 
-    this._main = opts.main
     this._registrationTimeout = opts.registrationTimeout || 5000 // 5 seconds
-    this._corePlugins = opts.corePlugins || []
 
     magicHook(this, ['createPlugin'])
 
@@ -46,8 +44,7 @@ module.exports = class Remi {
     }))(merge({}, pluginTarget), plugin.options)
   }
   register(target, plugins) {
-    plugins = this._corePlugins.concat(plugins)
-
+    plugins = [].concat(plugins)
     target.registrations = target.registrations || {}
 
     let registrations = []
@@ -81,17 +78,6 @@ module.exports = class Remi {
       }
     }
 
-    let mainPlugin = target.registrations[this._main]
-    if (this._main) {
-      if (!mainPlugin) {
-        return Promise.reject(new Error('main plugin called `' + this._main +
-          '` is missing'))
-      }
-      if (mainPlugin.dependencies.length > 0) {
-        return Promise.reject(new Error('main plugin cannot have dependencies'))
-      }
-    }
-
     /* extend dependencies with values before */
     registrations.forEach(function(registration) {
       registration.before.forEach(function(beforeDep) {
@@ -100,18 +86,11 @@ module.exports = class Remi {
     })
 
     let tsort = new TopoSort()
-    registrations.forEach(registration => {
-      if (registration.name !== this._main) {
-        tsort.add(registration.name, registration.dependencies)
-      }
-    })
+    registrations.forEach(reg => tsort.add(reg.name, reg.dependencies))
 
     let sortedPluginNames = tsort.sort()
     sortedPluginNames.reverse()
     let sortedPlugins = []
-    if (mainPlugin) {
-      sortedPlugins.push(mainPlugin)
-    }
     for (let i = 0; i < sortedPluginNames.length; i++) {
       let pluginName = sortedPluginNames[i]
       if (!target.registrations[pluginName]) {

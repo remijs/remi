@@ -121,30 +121,6 @@ remi.register(app, [{
 ```
 
 
-## Main plugin
-
-You can specify the plugin that should be registered first by passing its name
-through the `main` option of the `Remi` class constructor options. The main plugin can't have any
-dependencies.
-
-```js
-function barPlugin(app, opts) {
-  console.log('Hello world!')
-}
-
-barPlugin.attributes = {
-  name: 'bar-plugin',
-  version: '1.0.0',
-};
-
-let remi = new Remi({
-  main: 'bar-plugin' /* the bar-plugin will be registered first */
-})
-remi.register(app, [fooPlugin, barPlugin, qazPlugin], function (err) {
-})
-```
-
-
 ## Example
 
 You can find a working example in the [example folder](example).
