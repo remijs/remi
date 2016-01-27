@@ -35,17 +35,16 @@
     "registry": "http://registry.npmjs.org"
   },
   "dependencies": {
-    "kamikaze": "^1.0.0",
     "magic-hook": "^0.1.1",
     "merge": "^1.2.0",
-    "promise-resolver": "^3.0.0",
-    "run-async": "^2.1.0",
     "topo-sort": "^1.0.0"
   },
   "devDependencies": {
     "chai": "^3.4.1",
     "coveralls": "^2.11.6",
+    "run-async": "^2.1.0",
     "istanbul": "^0.4.2",
+    "kamikaze": "^1.0.0",
     "mocha": "^2.3.3",
     "plugiator": "^0.1.1",
     "sinon": "^1.17.2",

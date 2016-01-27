@@ -1,7 +1,6 @@
 'use strict';
-
 module.exports = function(hub, options, next) {
-  hub.fooSays = 'Hello world!'
+  hub.root.fooSays = 'Hello world!'
   next()
 }
 

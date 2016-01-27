@@ -77,47 +77,42 @@ Plugins can be loaded one at a time, or as a group in an array, by the
 `register()` method of a `Remi` object, for example:
 
 ```js
-const Remi = require('remi')
+const remi = require('remi')
 
 // load one plugin
-let remi = new Remi()
-remi.register(app, require('myplugin'), function(err) {
-  if (err) {
-    console.error('Failed to load plugin:', err);
-  }
-});
+let registrator = remi(app)
+registrator
+  .register(require('myplugin'))
+  .then(() => console.log('myplugin was successfully registered'))
+  .catch(err => console.error('Failed to load plugin:', err))
 
 // load multiple plugins
-remi.register(app, [require('myplugin'), require('yourplugin')], function(err) {
-  if (err) {
-    console.error('Failed to load a plugin:', err);
-  }
-});
+registrator
+  .register([require('myplugin'), require('yourplugin')])
+  .catch(err => console.error('Failed to load plugin:', err))
 ```
 
 To pass options to your plugin, we instead create an object with `register` and `options` keys, such as:
 
 ```js
-remi.register(app, {
+registrator.register({
   register: require('myplugin'),
   options: {
     message: 'hello'
   }
-}, function(err) {
 })
 ```
 
 These objects can also be passed in an array:
 
 ```js
-remi.register(app, [{
+registrator.register([{
   register: require('plugin1'),
   options: {}
 }, {
   register: require('plugin2'),
   options: {}
-}], function(err) {
-})
+}])
 ```
 
 

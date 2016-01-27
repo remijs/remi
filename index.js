@@ -1,107 +1,116 @@
 'use strict'
 const TopoSort = require('topo-sort')
 const magicHook = require('magic-hook')
-const runAsync = require('run-async')
-const kamikaze = require('kamikaze')
-const promiseResolver = require('promise-resolver')
 const merge = require('merge')
 
-module.exports = class Remi {
-  constructor(opts) {
-    opts = opts || {}
+module.exports = remi
 
-    this._registrationTimeout = opts.registrationTimeout || 5000 // 5 seconds
-
-    magicHook(this, ['createPlugin'])
-
-    let extensions = opts.extensions || []
-    extensions
-      .forEach(ext => ext.extension(this, ext.options || {}))
+function remi(target) {
+  let internals = {
+    register(target, plugin, cb) {
+      plugin.register(target, plugin.options, cb)
+    },
   }
-  createPlugin(target) {
-    return target
-  }
-  _registerNext(target, plugins, cb) {
-    let plugin = plugins.shift()
 
-    if (!plugin) return cb(null)
+  magicHook(internals, ['register'])
 
-    let pluginTarget = this.createPlugin(
-      merge({}, { root: target }, target),
-      plugin
-    )
-    pluginTarget.root = target
+  function registerNext(plugins, cb) {
+    let plugin = plugins.next().value
 
-    runAsync.cb(plugin.register, kamikaze(this._registrationTimeout, err => {
-      if (err) {
-        let wrapperErr = new Error('error during registering ' + plugin.name +
-          '. ' + err)
-        wrapperErr.internalError = err
-        return cb(wrapperErr)
-      }
+    if (!plugin) return cb()
 
-      this._registerNext(target, plugins, cb)
-    }))(merge({}, pluginTarget), plugin.options)
-  }
-  register(target, plugins) {
-    plugins = [].concat(plugins)
-    target.registrations = target.registrations || {}
-
-    let registrations = []
-    for (let i = 0; i < plugins.length; ++i) {
-      let plugin = plugins[i]
-
-      if (typeof plugin === 'function' && !plugin.register) {
-        /* plugin is register() function */
-        plugin = { register: plugin }
-      } else if (!plugin.register) {
-        return Promise.reject(new Error('Plugin missing a register method'))
-      }
-
-      if (plugin.register.register) { /* Required plugin */
-        plugin.register = plugin.register.register
-      }
-
-      let attributes = plugin.register.attributes
-      let registration = {
-        register: plugin.register,
-        name: attributes.name || attributes.pkg.name,
-        version: attributes.version || attributes.pkg && attributes.pkg.version,
-        options: merge({}, plugin.options),
-        dependencies: attributes.dependencies || [],
-        before: attributes.before || [],
-      }
-
-      if (!target.registrations[registration.name]) {
-        registrations.push(registration)
-        target.registrations[registration.name] = registration
-      }
+    function wrapError(err) {
+      let wrapperErr = new Error('Failed to register ' + plugin.name +
+        '. ' + err)
+      wrapperErr.internalError = err
+      return wrapperErr
     }
 
-    /* extend dependencies with values before */
-    registrations.forEach(function(registration) {
-      registration.before.forEach(function(beforeDep) {
-        target.registrations[beforeDep].dependencies.push(registration.name)
-      })
-    })
+    internals.register(
+      merge({}, { root: target }, target),
+      plugin,
+      function(err) {
+        if (err) return cb(wrapError(err))
 
+        target.registrations[plugin.name] = plugin
+        registerNext(plugins, cb)
+      }
+    )
+  }
+
+  function getRegister(plugin) {
+    if (typeof plugin !== 'function' && !plugin.register) {
+      throw new Error('Plugin missing a register method')
+    }
+
+    // plugin is register() function
+    if (typeof plugin === 'function' && !plugin.register) return plugin
+
+    // Required plugin
+    if (plugin.register.register) return plugin.register.register
+
+    return plugin.register
+  }
+
+  function pluginToRegistration(plugin) {
+    let register = getRegister(plugin)
+
+    let attributes = register.attributes
+    return {
+      register,
+      name: attributes.name || attributes.pkg.name,
+      version: attributes.version || attributes.pkg && attributes.pkg.version,
+      options: merge({}, plugin.options),
+      dependencies: attributes.dependencies || [],
+    }
+  }
+
+  function* sortPlugins(plugins) {
     let tsort = new TopoSort()
-    registrations.forEach(reg => tsort.add(reg.name, reg.dependencies))
+
+    Object.keys(plugins)
+      .map(key => plugins[key])
+      .forEach(reg => tsort.add(reg.name, reg.dependencies))
 
     let sortedPluginNames = tsort.sort()
     sortedPluginNames.reverse()
-    let sortedPlugins = []
-    for (let i = 0; i < sortedPluginNames.length; i++) {
-      let pluginName = sortedPluginNames[i]
-      if (!target.registrations[pluginName]) {
-        return Promise.reject(new Error('Plugin called ' + pluginName +
-          ' required by dependencies but wasn\'t registered'))
-      }
-      sortedPlugins.push(target.registrations[pluginName])
-    }
 
-    let deferred = promiseResolver.defer()
-    this._registerNext(target, sortedPlugins, deferred.cb)
-    return deferred.promise
+    for (let pluginName of sortedPluginNames) {
+      if (!target.registrations[pluginName] && !plugins[pluginName]) {
+        throw new Error('Plugin called ' + pluginName +
+          ' required by dependencies but wasn\'t registered')
+      }
+
+      if (!target.registrations[pluginName]) yield plugins[pluginName]
+    }
+  }
+
+  return {
+    hook() {
+      let args = Array.prototype.slice.call(arguments)
+      args.unshift('register')
+      internals.pre.apply(null, args)
+    },
+    register(plugins) {
+      try {
+        plugins = [].concat(plugins)
+        target.registrations = target.registrations || {}
+
+        let newRegistrations = {}
+        plugins
+          .map(pluginToRegistration)
+          .filter(reg => !target.registrations[reg.name])
+          .forEach(reg => newRegistrations[reg.name] = reg)
+
+        let sortedPlugins = sortPlugins(newRegistrations)
+
+        return new Promise((resolve, reject) => {
+          let cb = err => err ? reject(err) : resolve()
+          registerNext(sortedPlugins, cb)
+        })
+      } catch (err) {
+        return Promise.reject(err)
+      }
+    },
   }
 }

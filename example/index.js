@@ -1,22 +1,21 @@
 'use strict'
-
-const Remi = require('../')
+const remi = require('..')
 
 function Hub() {
-  this._remi = new Remi()
+  this._registrator = remi(this)
 }
 
-Hub.prototype.register = function(plugins, cb) {
-  this._remi.register(this, plugins, cb)
+Hub.prototype.register = function(plugins) {
+  return this._registrator.register(plugins)
 }
 
 let hub = new Hub()
-hub.register([
-  {
-    register: require('./plugins/bar'),
-    options: { sayTimes: 4 },
-  },
-  require('./plugins/foo'),
-], function() {
-  console.log('done')
-})
+hub
+  .register([
+    {
+      register: require('./plugins/bar'),
+      options: { sayTimes: 4 },
+    },
+    require('./plugins/foo'),
+  ])
+  .then(() => console.log('done'))

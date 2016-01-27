@@ -4,27 +4,37 @@ const expect = chai.expect
 const sinon = require('sinon')
 const sinonChai = require('sinon-chai')
 const plugiator = require('plugiator')
-const Remi = require('../')
+const remi = require('..')
+const runAsync = require('run-async')
+const kamikaze = require('kamikaze')
 
 chai.use(sinonChai)
 
-describe('Remi', function() {
+function runAsyncHook() {
+  return (next, target, plugin, cb) => {
+    let oldRegister = plugin.register
+    plugin.register = (app, opts, next) => {
+      runAsync.cb(oldRegister, next)(app, opts)
+    }
+    next(target, plugin, cb)
+  }
+}
+
+describe('remi', function() {
   let app
-  let remi
+  let registrator
 
   beforeEach(function() {
     app = {}
-    remi = new Remi()
+    registrator = remi(app)
   })
 
   it('should register plugin with no version', function() {
     let plugin = plugiator.anonymous((app, options, next) => next())
 
-    return remi
-      .register(app, { register: plugin })
-      .then(() => {
-        expect(app.registrations[plugin.attributes.name]).to.exist
-      })
+    return registrator
+      .register({ register: plugin })
+      .then(() => expect(app.registrations[plugin.attributes.name]).to.exist)
   })
 
   it('should register plugin with attributes from a package.json', function() {
@@ -37,8 +47,8 @@ describe('Remi', function() {
       },
     }, (app, options, next) => next())
 
-    return remi
-      .register(app, { register: plugin })
+    return registrator
+      .register({ register: plugin })
       .then(() => {
         expect(app.registrations[name]).to.exist
         expect(app.registrations[name].name).to.eq(name)
@@ -49,8 +59,10 @@ describe('Remi', function() {
   it('should register synchronous plugin', function() {
     let plugin = plugiator.anonymous((app, opts) => {})
 
-    return remi
-      .register(app, { register: plugin })
+    registrator.hook(runAsyncHook())
+
+    return registrator
+      .register({ register: plugin })
       .then(() => {
         expect(app.registrations[plugin.attributes.name]).to.exist
       })
@@ -59,32 +71,31 @@ describe('Remi', function() {
   it('should register plugin that returns a promise', function() {
     let plugin = plugiator.anonymous((app, opts) => Promise.resolve())
 
-    return remi.register(app, { register: plugin })
+    registrator.hook(runAsyncHook())
+
+    return registrator.register({ register: plugin })
       .then(() => {
         expect(app.registrations[plugin.attributes.name]).to.exist
       })
   })
 
   it('should register plugin that is passed as an object', function() {
-    let register = sinon.spy()
-    let plugin = {
-      register: plugiator.anonymous(register),
-    }
+    let register = sinon.spy(plugiator.noop())
+    let plugin = { register }
 
-    return remi
-      .register(app, { register: plugin })
+    return registrator
+      .register({ register: plugin })
       .then(() => {
         expect(register).to.have.been.calledOnce
       })
   })
 
   it('should register plugin with options', function() {
-    let register = sinon.spy()
-    let plugin = plugiator.anonymous(register)
+    let register = sinon.spy(plugiator.noop())
     let pluginOpts = { something: true }
 
-    return remi
-      .register(app, { register: plugin, options: pluginOpts })
+    return registrator
+      .register({ register: register, options: pluginOpts })
       .then(() => {
         expect(register).to.have.been.calledOnce
         expect(register.args[0][1]).to.eql(pluginOpts)
@@ -98,18 +109,18 @@ describe('Remi', function() {
       dependencies: ['foo'],
     })
 
-    remi.register({}, plugin).catch(err => {
+    registrator.register(plugin).catch(err => {
       expect(err).to.be.an.instanceof(Error)
       done()
     })
   })
 
   it('should throw error if one the plugins didn\'t finished registering in time', function(done) {
-    let remi = new Remi({
-      registrationTimeout: 10,
+    registrator.hook((next, target, plugin, cb) => {
+      next(target, plugin, kamikaze(10, cb))
     })
-    remi
-      .register({}, [
+    registrator
+      .register([
         {
           register: plugiator.anonymous((server, opts, next) => undefined),
         },
@@ -117,21 +128,6 @@ describe('Remi', function() {
       .catch(err => {
         expect(err).to.be.an.instanceof(Error)
         done()
-      })
-  })
-
-  it('should register plugins in correct order when `before` specified', function() {
-    let plugin2 = sinon.spy(plugiator.noop('plugin2'))
-    let plugin1 = sinon.spy(plugiator.noop({
-      name: 'plugin1',
-      version: '0.0.0',
-      before: ['plugin2'],
-    }))
-
-    return remi
-      .register(app, [plugin2, plugin1])
-      .then(() => {
-        expect(plugin1).to.have.been.calledBefore(plugin2)
       })
   })
 
@@ -154,7 +150,7 @@ describe('Remi', function() {
         register: plugin2,
       },
     ]
-    return remi.register(app, plugins).then(() => {
+    return registrator.register(plugins).then(() => {
       expect(app.registrations).to.not.be.undefined
       expect(app.registrations.plugin1).to.not.be.undefined
       expect(app.registrations.plugin1.name).to.eq('plugin1')
@@ -170,25 +166,20 @@ describe('Remi', function() {
   it('should register plugin only once', function() {
     let plugin = sinon.spy(plugiator.noop())
 
-    let remi = new Remi({
-      corePlugins: [plugin],
-    })
-
-    return remi.register(app, [plugin])
-      .then(() => remi.register(app, [plugin]))
+    return registrator.register([plugin])
+      .then(() => registrator.register([plugin]))
       .then(() => expect(plugin).to.have.been.calledOnce)
   })
 
-  it('should return a promise', function() {
+  it('should register plugin only once even if it is a dependency', function() {
     let plugin = sinon.spy(plugiator.noop())
-
-    let remi = new Remi({
-      corePlugins: [plugin],
+    let dependentPlugin = plugiator.noop({
+      name: 'foo',
+      dependencies: [plugin.attributes.name],
     })
 
-    return remi
-      .register(app, [plugin])
-      .then(() => remi.register(app, [plugin]))
+    return registrator.register([plugin])
+      .then(() => registrator.register([dependentPlugin]))
       .then(() => expect(plugin).to.have.been.calledOnce)
   })
 
@@ -203,13 +194,13 @@ describe('Remi', function() {
       dependencies: ['plugin1'],
     })
 
-    return remi.register(app, [plugin1])
-      .then(() => remi.register(app, [plugin2]))
+    return registrator.register([plugin1])
+      .then(() => registrator.register([plugin2]))
   })
 
   it('should throw error if no register method passed', function(done) {
-    remi
-      .register(app, { attributes: {name: 'foo'} })
+    registrator
+      .register({ attributes: {name: 'foo'} })
       .catch(err => {
         expect(err).to.be.an.instanceof(Error, 'Plugin missing a register method')
         done()
@@ -219,11 +210,13 @@ describe('Remi', function() {
 
 describe('plugin context', function() {
   it('should not share properties assigned by another plugin', function() {
-    let plugin1 = plugiator.anonymous((app, opts) => {
+    let plugin1 = plugiator.anonymous((app, opts, next) => {
       app.foo = 1
+      next()
     })
-    let plugin2 = plugiator.anonymous((app, opts) => {
+    let plugin2 = plugiator.anonymous((app, opts, next) => {
       expect(app.foo).to.be.undefined
+      next()
     })
 
     let app = {}
@@ -236,18 +229,19 @@ describe('plugin context', function() {
         register: plugin2,
       },
     ]
-    let remi = new Remi()
-    return remi.register(app, plugins)
+    let registrator = remi(app)
+    return registrator.register(plugins)
   })
 
   it('should pass all the app props to the plugin', function() {
-    let plugin = plugiator.anonymous((app, options) => {
+    let plugin = plugiator.anonymous((app, options, next) => {
       expect(app.foo).to.exist
       expect(app.bar).to.exist
       expect(app.protoFn).to.exist
       expect(app.root.foo).to.exist
       expect(app.root.bar).to.exist
       expect(app.root.protoFn).to.exist
+      next()
     })
 
     function App() {}
@@ -257,17 +251,19 @@ describe('plugin context', function() {
     app.bar = function() {
       return 2
     }
-    let remi = new Remi()
-    return remi.register(app, plugin)
+    let registrator = remi(app)
+    return registrator.register(plugin)
   })
 
   it('should share the value in root', function() {
-    let plugin1 = plugiator.anonymous((app, options) => {
+    let plugin1 = plugiator.anonymous((app, options, next) => {
       app.root.foo = 1
+      next()
     })
-    let plugin2 = plugiator.anonymous((app, options) => {
+    let plugin2 = plugiator.anonymous((app, options, next) => {
       expect(app.foo).to.eq(1)
       expect(app.root.foo).to.eq(1)
+      next()
     })
 
     let app = {}
@@ -281,36 +277,21 @@ describe('plugin context', function() {
       },
     ]
 
-    let remi = new Remi()
-    return remi.register(app, plugins)
+    let registrator = remi(app)
+    return registrator.register(plugins)
   })
 })
 
-describe('remi extensions', function() {
+describe('remi hooks', function() {
   it('should get options', function() {
-    let extension = sinon.spy((remi, opts) => {
-      expect(opts.foo).to.eq('bar')
+    let app = {}
+    let registrator = remi(app)
+    registrator.hook((next, target, plugin, cb) => {
+      next(Object.assign({}, { foo: 1 }, target), plugin, cb)
     })
-
-    let remi = new Remi({
-      extensions: [{
-        extension,
-        options: { foo: 'bar' },
-      },],
-    })
-    expect(extension).to.be.calledOnce
-  })
-
-  it('should never pass no options', function() {
-    let extension = sinon.spy((remi, opts) => {
-      expect(opts).to.eql({})
-    })
-
-    let remi = new Remi({
-      extensions: [{
-        extension,
-      },],
-    })
-    expect(extension).to.be.calledOnce
+    return registrator.register(plugiator.anonymous((target, server, next) => {
+      expect(target.foo).to.eq(1)
+      next()
+    }))
   })
 })

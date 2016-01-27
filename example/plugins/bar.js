@@ -1,5 +1,4 @@
 'use strict'
-
 module.exports = function(hub, options, next) {
   for (let i = 0; i < options.sayTimes; i++) {
     console.log('Foo says: ' + hub.fooSays)
