@@ -115,19 +115,6 @@ describe('remi', function() {
       })
   })
 
-  it('should throw error if dependent plugin not present', function(done) {
-    let plugin = plugiator.noop({
-      name: 'plugin1',
-      version: '0.0.0',
-      dependencies: ['foo'],
-    })
-
-    registrator.register(plugin).catch(err => {
-      expect(err).to.be.an.instanceof(Error)
-      done()
-    })
-  })
-
   it('should throw error if one the plugins didn\'t finished registering in time', function(done) {
     registrator.hook((next, target, plugin, cb) => {
       next(target, plugin, kamikaze(10, cb))
@@ -182,33 +169,6 @@ describe('remi', function() {
     return registrator.register([plugin])
       .then(() => registrator.register([plugin]))
       .then(() => expect(plugin).to.have.been.calledOnce)
-  })
-
-  it('should register plugin only once even if it is a dependency', function() {
-    let plugin = sinon.spy(plugiator.noop())
-    let dependentPlugin = plugiator.noop({
-      name: 'foo',
-      dependencies: [plugin.attributes.name],
-    })
-
-    return registrator.register([plugin])
-      .then(() => registrator.register([dependentPlugin]))
-      .then(() => expect(plugin).to.have.been.calledOnce)
-  })
-
-  it('should not return an error if dependency was already registered', function() {
-    let plugin1 = plugiator.noop({
-      name: 'plugin1',
-      version: '0.0.0',
-    })
-    let plugin2 = plugiator.noop({
-      name: 'plugin2',
-      version: '0.0.0',
-      dependencies: ['plugin1'],
-    })
-
-    return registrator.register([plugin1])
-      .then(() => registrator.register([plugin2]))
   })
 
   it('should throw error if no register method passed', function(done) {

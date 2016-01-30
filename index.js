@@ -17,13 +17,6 @@ function remi(target) {
 
     if (!plugin) return cb()
 
-    for (let dependency of plugin.dependencies) {
-      if (!target.registrations[dependency]) {
-        throw new Error('Plugin called ' + dependency +
-          ' required by dependencies but wasn\'t registered')
-      }
-    }
-
     function wrapError(err) {
       let wrapperErr = new Error('Failed to register ' + plugin.name +
         '. ' + err)
@@ -61,7 +54,7 @@ function remi(target) {
     let register = getRegister(plugin)
 
     let attributes = register.attributes
-    return Object.assign({ dependencies: [] }, attributes, {
+    return Object.assign(attributes, {
       register,
       name: attributes.name || attributes.pkg.name,
       version: attributes.version || attributes.pkg && attributes.pkg.version,

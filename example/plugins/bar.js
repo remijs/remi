@@ -9,5 +9,4 @@ module.exports = function(hub, options, next) {
 module.exports.attributes = {
   name: 'bar',
   version: '0.0.0',
-  dependencies: ['foo'],
 }
