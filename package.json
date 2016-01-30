@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zkochan/remi.git"
+    "url": "git+https://github.com/remijs/remi.git"
   },
   "keywords": [
     "plugin",
@@ -28,9 +28,9 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/zkochan/remi/issues"
+    "url": "https://github.com/remijs/remi/issues"
   },
-  "homepage": "https://github.com/zkochan/remi#readme",
+  "homepage": "https://github.com/remijs/remi#readme",
   "publishConfig": {
     "registry": "http://registry.npmjs.org"
   },
