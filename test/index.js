@@ -5,20 +5,8 @@ const sinon = require('sinon')
 const sinonChai = require('sinon-chai')
 const plugiator = require('plugiator')
 const remi = require('..')
-const runAsync = require('run-async')
-const kamikaze = require('kamikaze')
 
 chai.use(sinonChai)
-
-function runAsyncHook() {
-  return (next, target, plugin, cb) => {
-    let oldRegister = plugin.register
-    plugin.register = (app, opts, next) => {
-      runAsync.cb(oldRegister, next)(app, opts)
-    }
-    next(target, plugin, cb)
-  }
-}
 
 describe('remi', function() {
   let app
@@ -69,29 +57,6 @@ describe('remi', function() {
       })
   })
 
-  it('should register synchronous plugin', function() {
-    let plugin = plugiator.anonymous((app, opts) => {})
-
-    registrator.hook(runAsyncHook())
-
-    return registrator
-      .register({ register: plugin })
-      .then(() => {
-        expect(app.registrations[plugin.attributes.name]).to.exist
-      })
-  })
-
-  it('should register plugin that returns a promise', function() {
-    let plugin = plugiator.anonymous((app, opts) => Promise.resolve())
-
-    registrator.hook(runAsyncHook())
-
-    return registrator.register({ register: plugin })
-      .then(() => {
-        expect(app.registrations[plugin.attributes.name]).to.exist
-      })
-  })
-
   it('should register plugin that is passed as an object', function() {
     let register = sinon.spy(plugiator.noop())
     let plugin = { register }
@@ -112,22 +77,6 @@ describe('remi', function() {
       .then(() => {
         expect(register).to.have.been.calledOnce
         expect(register.args[0][1]).to.eql(pluginOpts)
-      })
-  })
-
-  it('should throw error if one the plugins didn\'t finished registering in time', function(done) {
-    registrator.hook((next, target, plugin, cb) => {
-      next(target, plugin, kamikaze(10, cb))
-    })
-    registrator
-      .register([
-        {
-          register: plugiator.anonymous((server, opts, next) => undefined),
-        },
-      ])
-      .catch(err => {
-        expect(err).to.be.an.instanceof(Error)
-        done()
       })
   })
 
@@ -176,6 +125,17 @@ describe('remi', function() {
       .register({ attributes: {name: 'foo'} })
       .catch(err => {
         expect(err).to.be.an.instanceof(Error, 'Plugin missing a register method')
+        done()
+      })
+  })
+
+  it('should throw error if one of the register methods has thrown one', function(done) {
+    registrator
+      .register({
+        register: plugiator.create('foo', (app, opts, next) => next(new Error('Some error'))),
+      })
+      .catch(err => {
+        expect(err).to.be.an.instanceof(Error, 'Failed to register foo. Error: Some error')
         done()
       })
   })
