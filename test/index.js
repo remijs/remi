@@ -233,23 +233,18 @@ describe('plugin context', function() {
     return registrator.register(plugins)
   })
 
-  it('should pass all the app props to the plugin', function() {
+  it('should pass all the enumerable app props to the plugin', function() {
     let plugin = plugiator.anonymous((app, options, next) => {
       expect(app.foo).to.exist
       expect(app.bar).to.exist
-      expect(app.protoFn).to.exist
       expect(app.root.foo).to.exist
       expect(app.root.bar).to.exist
-      expect(app.root.protoFn).to.exist
       next()
     })
 
-    function App() {}
-    App.prototype.protoFn = function() {}
-    let app = new App()
-    app.foo = 1
-    app.bar = function() {
-      return 2
+    let app = {
+      foo: 1,
+      bar() {},
     }
     let registrator = remi(app)
     return registrator.register(plugin)

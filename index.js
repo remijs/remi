@@ -1,7 +1,6 @@
 'use strict'
 const TopoSort = require('topo-sort')
 const magicHook = require('magic-hook')
-const merge = require('merge')
 
 module.exports = remi
 
@@ -27,7 +26,7 @@ function remi(target) {
     }
 
     internals.register(
-      merge({}, { root: target }, target),
+      Object.assign({}, { root: target }, target),
       plugin,
       function(err) {
         if (err) return cb(wrapError(err))
@@ -60,7 +59,7 @@ function remi(target) {
       register,
       name: attributes.name || attributes.pkg.name,
       version: attributes.version || attributes.pkg && attributes.pkg.version,
-      options: merge({}, plugin.options),
+      options: Object.assign({}, plugin.options),
       dependencies: attributes.dependencies || [],
     }
   }
