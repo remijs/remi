@@ -12,10 +12,11 @@ Hub.prototype.register = function(plugins) {
 let hub = new Hub()
 hub
   .register([
+    require('./plugins/foo'),
     {
       register: require('./plugins/bar'),
       options: { sayTimes: 4 },
     },
-    require('./plugins/foo'),
   ])
   .then(() => console.log('done'))
+  .catch(err => console.error(err))

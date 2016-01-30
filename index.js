@@ -1,5 +1,4 @@
 'use strict'
-const TopoSort = require('topo-sort')
 const magicHook = require('magic-hook')
 
 module.exports = remi
@@ -14,9 +13,16 @@ function remi(target) {
   magicHook(internals, ['register'])
 
   function registerNext(plugins, cb) {
-    let plugin = plugins.next().value
+    let plugin = plugins.shift()
 
     if (!plugin) return cb()
+
+    for (let dependency of plugin.dependencies) {
+      if (!target.registrations[dependency]) {
+        throw new Error('Plugin called ' + dependency +
+          ' required by dependencies but wasn\'t registered')
+      }
+    }
 
     function wrapError(err) {
       let wrapperErr = new Error('Failed to register ' + plugin.name +
@@ -55,33 +61,12 @@ function remi(target) {
     let register = getRegister(plugin)
 
     let attributes = register.attributes
-    return {
+    return Object.assign({ dependencies: [] }, attributes, {
       register,
       name: attributes.name || attributes.pkg.name,
       version: attributes.version || attributes.pkg && attributes.pkg.version,
       options: Object.assign({}, plugin.options),
-      dependencies: attributes.dependencies || [],
-    }
-  }
-
-  function* sortPlugins(plugins) {
-    let tsort = new TopoSort()
-
-    Object.keys(plugins)
-      .map(key => plugins[key])
-      .forEach(reg => tsort.add(reg.name, reg.dependencies))
-
-    let sortedPluginNames = tsort.sort()
-    sortedPluginNames.reverse()
-
-    for (let pluginName of sortedPluginNames) {
-      if (!target.registrations[pluginName] && !plugins[pluginName]) {
-        throw new Error('Plugin called ' + pluginName +
-          ' required by dependencies but wasn\'t registered')
-      }
-
-      if (!target.registrations[pluginName]) yield plugins[pluginName]
-    }
+    })
   }
 
   return {
@@ -95,17 +80,13 @@ function remi(target) {
         plugins = [].concat(plugins)
         target.registrations = target.registrations || {}
 
-        let newRegistrations = {}
-        plugins
+        let newRegistrations = plugins
           .map(pluginToRegistration)
           .filter(reg => !target.registrations[reg.name])
-          .forEach(reg => newRegistrations[reg.name] = reg)
-
-        let sortedPlugins = sortPlugins(newRegistrations)
 
         return new Promise((resolve, reject) => {
           let cb = err => err ? reject(err) : resolve()
-          registerNext(sortedPlugins, cb)
+          registerNext(newRegistrations, cb)
         })
       } catch (err) {
         return Promise.reject(err)

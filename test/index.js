@@ -56,6 +56,19 @@ describe('remi', function() {
       })
   })
 
+  it('should pass all the attributes to the registrations object', function() {
+    let plugin = plugiator.noop({
+      name: 'some-name',
+      foo: 'foo',
+    })
+
+    return registrator
+      .register({ register: plugin })
+      .then(() => {
+        expect(app.registrations[plugin.attributes.name].foo).to.eq('foo')
+      })
+  })
+
   it('should register synchronous plugin', function() {
     let plugin = plugiator.anonymous((app, opts) => {})
 
