@@ -1,16 +1,12 @@
 'use strict'
-const magicHook = require('magic-hook')
+const hook = require('magic-hook')
 
 module.exports = remi
 
 function remi(target) {
-  let internals = {
-    register(target, plugin, cb) {
-      plugin.register(target, plugin.options, cb)
-    },
-  }
-
-  magicHook(internals, ['register'])
+  let register = hook(function(target, plugin, cb) {
+    plugin.register(target, plugin.options, cb)
+  })
 
   function registerNext(plugins, cb) {
     let plugin = plugins.shift()
@@ -24,7 +20,7 @@ function remi(target) {
       return wrapperErr
     }
 
-    internals.register(
+    register(
       Object.assign({}, { root: target }, target),
       plugin,
       function(err) {
@@ -63,11 +59,7 @@ function remi(target) {
   }
 
   return {
-    hook() {
-      let args = Array.prototype.slice.call(arguments)
-      args.unshift('register')
-      internals.pre.apply(null, args)
-    },
+    hook: register.pre,
     register(plugins) {
       try {
         plugins = [].concat(plugins)

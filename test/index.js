@@ -139,87 +139,106 @@ describe('remi', function() {
         done()
       })
   })
-})
 
-describe('plugin context', function() {
-  it('should not share properties assigned by another plugin', function() {
-    let plugin1 = plugiator.anonymous((app, opts, next) => {
+  describe('plugin context', function() {
+    it('should not share properties assigned by another plugin', function() {
+      let plugin1 = plugiator.anonymous((app, opts, next) => {
+        app.foo = 1
+        next()
+      })
+      let plugin2 = plugiator.anonymous((app, opts, next) => {
+        expect(app.foo).to.be.undefined
+        next()
+      })
+
+      let plugins = [
+        {
+          register: plugin1,
+          options: {foo: 1},
+        },
+        {
+          register: plugin2,
+        },
+      ]
+      return registrator.register(plugins)
+    })
+
+    it('should pass all the enumerable app props to the plugin', function() {
+      let plugin = plugiator.anonymous((app, options, next) => {
+        expect(app.foo).to.exist
+        expect(app.bar).to.exist
+        expect(app.root.foo).to.exist
+        expect(app.root.bar).to.exist
+        next()
+      })
+
       app.foo = 1
-      next()
-    })
-    let plugin2 = plugiator.anonymous((app, opts, next) => {
-      expect(app.foo).to.be.undefined
-      next()
+      app.bar = function() {}
+      return registrator.register(plugin)
     })
 
-    let app = {}
-    let plugins = [
-      {
-        register: plugin1,
-        options: {foo: 1},
-      },
-      {
-        register: plugin2,
-      },
-    ]
-    let registrator = remi(app)
-    return registrator.register(plugins)
+    it('should share the value in root', function() {
+      let plugin1 = plugiator.anonymous((app, options, next) => {
+        app.root.foo = 1
+        next()
+      })
+      let plugin2 = plugiator.anonymous((app, options, next) => {
+        expect(app.foo).to.eq(1)
+        expect(app.root.foo).to.eq(1)
+        next()
+      })
+
+      let plugins = [
+        {
+          register: plugin1,
+          options: {foo: 1},
+        },
+        {
+          register: plugin2,
+        },
+      ]
+
+      return registrator.register(plugins)
+    })
   })
 
-  it('should pass all the enumerable app props to the plugin', function() {
-    let plugin = plugiator.anonymous((app, options, next) => {
-      expect(app.foo).to.exist
-      expect(app.bar).to.exist
-      expect(app.root.foo).to.exist
-      expect(app.root.bar).to.exist
-      next()
+  describe('remi hooks', function() {
+    it('should get options', function() {
+      registrator.hook((next, target, plugin, cb) => {
+        next(Object.assign({}, { foo: 1 }, target), plugin, cb)
+      })
+      return registrator.register(plugiator.anonymous((target, server, next) => {
+        expect(target.foo).to.eq(1)
+        next()
+      }))
     })
 
-    let app = {
-      foo: 1,
-      bar() {},
-    }
-    let registrator = remi(app)
-    return registrator.register(plugin)
-  })
-
-  it('should share the value in root', function() {
-    let plugin1 = plugiator.anonymous((app, options, next) => {
-      app.root.foo = 1
-      next()
-    })
-    let plugin2 = plugiator.anonymous((app, options, next) => {
-      expect(app.foo).to.eq(1)
-      expect(app.root.foo).to.eq(1)
-      next()
+    it('should add several hooks passed as arguments', function() {
+      function noopHook(next, target, plugin, cb) {
+        next(target, plugin, cb)
+      }
+      let hook1 = sinon.spy(noopHook)
+      let hook2 = sinon.spy(noopHook)
+      registrator.hook(hook1, hook2)
+      return registrator.register(plugiator.anonymous((target, server, next) => {
+        expect(hook1).to.have.been.calledOnce
+        expect(hook2).to.have.been.calledOnce
+        next()
+      }))
     })
 
-    let app = {}
-    let plugins = [
-      {
-        register: plugin1,
-        options: {foo: 1},
-      },
-      {
-        register: plugin2,
-      },
-    ]
-
-    let registrator = remi(app)
-    return registrator.register(plugins)
-  })
-})
-
-describe('remi hooks', function() {
-  it('should get options', function() {
-    let app = {}
-    let registrator = remi(app)
-    registrator.hook((next, target, plugin, cb) => {
-      next(Object.assign({}, { foo: 1 }, target), plugin, cb)
+    it('should add several hooks passed in an array', function() {
+      function noopHook(next, target, plugin, cb) {
+        next(target, plugin, cb)
+      }
+      let hook1 = sinon.spy(noopHook)
+      let hook2 = sinon.spy(noopHook)
+      registrator.hook([hook1, hook2])
+      return registrator.register(plugiator.anonymous((target, server, next) => {
+        expect(hook1).to.have.been.calledOnce
+        expect(hook2).to.have.been.calledOnce
+        next()
+      }))
     })
-    return registrator.register(plugiator.anonymous((target, server, next) => {
-      expect(target.foo).to.eq(1)
-      next()
-    }))
   })
 })

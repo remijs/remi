@@ -5,7 +5,7 @@
   "bitwise": false,
   "camelcase": true,
   "eqeqeq": true,
-  "latedef": true,
+  "latedef": "nofunc",
   "newcap": true,
   "undef": true,
   "noarg": true,
