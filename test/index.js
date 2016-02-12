@@ -18,7 +18,7 @@ describe('remi', function() {
   })
 
   it('should register plugin with no version', function() {
-    let plugin = plugiator.anonymous((app, options, next) => next())
+    const plugin = plugiator.anonymous((app, options, next) => next())
 
     return registrator
       .register({ register: plugin })
@@ -26,9 +26,9 @@ describe('remi', function() {
   })
 
   it('should register plugin with attributes from a package.json', function() {
-    let name = 'foo'
-    let version = '2.4.0'
-    let plugin = plugiator.create({
+    const name = 'foo'
+    const version = '2.4.0'
+    const plugin = plugiator.create({
       pkg: {
         name,
         version,
@@ -45,7 +45,7 @@ describe('remi', function() {
   })
 
   it('should pass all the attributes to the registrations object', function() {
-    let plugin = plugiator.noop({
+    const plugin = plugiator.noop({
       name: 'some-name',
       foo: 'foo',
     })
@@ -58,8 +58,8 @@ describe('remi', function() {
   })
 
   it('should register plugin that is passed as an object', function() {
-    let register = sinon.spy(plugiator.noop())
-    let plugin = { register }
+    const register = sinon.spy(plugiator.noop())
+    const plugin = { register }
 
     return registrator
       .register({ register: plugin })
@@ -69,8 +69,8 @@ describe('remi', function() {
   })
 
   it('should register plugin with options', function() {
-    let register = sinon.spy(plugiator.noop())
-    let pluginOpts = { something: true }
+    const register = sinon.spy(plugiator.noop())
+    const pluginOpts = { something: true }
 
     return registrator
       .register({ register: register, options: pluginOpts })
@@ -81,16 +81,16 @@ describe('remi', function() {
   })
 
   it('should expose the registrations object', function() {
-    let plugin1 = plugiator.noop({
+    const plugin1 = plugiator.noop({
       name: 'plugin1',
       version: '0.0.0',
     })
-    let plugin2 = plugiator.noop({
+    const plugin2 = plugiator.noop({
       name: 'plugin2',
       version: '0.1.0',
     })
 
-    let plugins = [
+    const plugins = [
       {
         register: plugin1,
         options: {foo: 1},
@@ -113,7 +113,7 @@ describe('remi', function() {
   })
 
   it('should register plugin only once', function() {
-    let plugin = sinon.spy(plugiator.noop())
+    const plugin = sinon.spy(plugiator.noop())
 
     return registrator.register([plugin])
       .then(() => registrator.register([plugin]))
@@ -142,16 +142,16 @@ describe('remi', function() {
 
   describe('plugin context', function() {
     it('should not share properties assigned by another plugin', function() {
-      let plugin1 = plugiator.anonymous((app, opts, next) => {
+      const plugin1 = plugiator.anonymous((app, opts, next) => {
         app.foo = 1
         next()
       })
-      let plugin2 = plugiator.anonymous((app, opts, next) => {
+      const plugin2 = plugiator.anonymous((app, opts, next) => {
         expect(app.foo).to.be.undefined
         next()
       })
 
-      let plugins = [
+      const plugins = [
         {
           register: plugin1,
           options: {foo: 1},
@@ -164,7 +164,7 @@ describe('remi', function() {
     })
 
     it('should pass all the enumerable app props to the plugin', function() {
-      let plugin = plugiator.anonymous((app, options, next) => {
+      const plugin = plugiator.anonymous((app, options, next) => {
         expect(app.foo).to.exist
         expect(app.bar).to.exist
         expect(app.root.foo).to.exist
@@ -178,17 +178,17 @@ describe('remi', function() {
     })
 
     it('should share the value in root', function() {
-      let plugin1 = plugiator.anonymous((app, options, next) => {
+      const plugin1 = plugiator.anonymous((app, options, next) => {
         app.root.foo = 1
         next()
       })
-      let plugin2 = plugiator.anonymous((app, options, next) => {
+      const plugin2 = plugiator.anonymous((app, options, next) => {
         expect(app.foo).to.eq(1)
         expect(app.root.foo).to.eq(1)
         next()
       })
 
-      let plugins = [
+      const plugins = [
         {
           register: plugin1,
           options: {foo: 1},
@@ -217,8 +217,8 @@ describe('remi', function() {
       function noopHook(next, target, plugin, cb) {
         next(target, plugin, cb)
       }
-      let hook1 = sinon.spy(noopHook)
-      let hook2 = sinon.spy(noopHook)
+      const hook1 = sinon.spy(noopHook)
+      const hook2 = sinon.spy(noopHook)
       registrator.hook(hook1, hook2)
       return registrator.register(plugiator.anonymous((target, server, next) => {
         expect(hook1).to.have.been.calledOnce
@@ -231,8 +231,8 @@ describe('remi', function() {
       function noopHook(next, target, plugin, cb) {
         next(target, plugin, cb)
       }
-      let hook1 = sinon.spy(noopHook)
-      let hook2 = sinon.spy(noopHook)
+      const hook1 = sinon.spy(noopHook)
+      const hook2 = sinon.spy(noopHook)
       registrator.hook([hook1, hook2])
       return registrator.register(plugiator.anonymous((target, server, next) => {
         expect(hook1).to.have.been.calledOnce

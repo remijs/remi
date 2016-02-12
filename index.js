@@ -4,17 +4,17 @@ const hook = require('magic-hook')
 module.exports = remi
 
 function remi(target) {
-  let register = hook(function(target, plugin, cb) {
+  const register = hook(function(target, plugin, cb) {
     plugin.register(target, plugin.options, cb)
   })
 
   function registerNext(plugins, cb) {
-    let plugin = plugins.shift()
+    const plugin = plugins.shift()
 
     if (!plugin) return cb()
 
     function wrapError(err) {
-      let wrapperErr = new Error('Failed to register ' + plugin.name +
+      const wrapperErr = new Error('Failed to register ' + plugin.name +
         '. ' + err)
       wrapperErr.internalError = err
       return wrapperErr
@@ -47,9 +47,9 @@ function remi(target) {
   }
 
   function pluginToRegistration(plugin) {
-    let register = getRegister(plugin)
+    const register = getRegister(plugin)
 
-    let attributes = register.attributes
+    const attributes = register.attributes
     return Object.assign(attributes, {
       register,
       name: attributes.name || attributes.pkg.name,
@@ -65,12 +65,12 @@ function remi(target) {
         plugins = [].concat(plugins)
         target.registrations = target.registrations || {}
 
-        let newRegistrations = plugins
+        const newRegistrations = plugins
           .map(pluginToRegistration)
           .filter(reg => !target.registrations[reg.name])
 
         return new Promise((resolve, reject) => {
-          let cb = err => err ? reject(err) : resolve()
+          const cb = err => err ? reject(err) : resolve()
           registerNext(newRegistrations, cb)
         })
       } catch (err) {
