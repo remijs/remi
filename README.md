@@ -116,15 +116,6 @@ registrator.register([{
 ```
 
 
-## Example
-
-You can find a working example in the [example folder](example).
-
-And on RequireBin.
-
-[![view on requirebin](http://requirebin.com/badge.png)](http://requirebin.com/?gist=27ea2b9d6dc72abea03c)
-
-
 ## License
 
-The MIT License (MIT)
+MIT © [Zoltan Kochan](https://github.com/zkochan)
