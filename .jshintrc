@@ -20,22 +20,5 @@
   "trailing": true,
   "expr": true,
   "curly": false,
-  "asi": true,
-  "globals": {
-    "jasmine": true,
-    "ApplicationConfiguration": true
-  },
-  "predef": [
-    "define",
-    "require",
-    "exports",
-    "module",
-    "describe",
-    "before",
-    "beforeEach",
-    "after",
-    "afterEach",
-    "it",
-    "inject"
-   ]
+  "asi": true
 }

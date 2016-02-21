@@ -1,12 +1,14 @@
 'use strict'
+const describe = require('mocha').describe
+const beforeEach = require('mocha').beforeEach
+const it = require('mocha').it
 const chai = require('chai')
 const expect = chai.expect
 const sinon = require('sinon')
-const sinonChai = require('sinon-chai')
 const plugiator = require('plugiator')
 const remi = require('..')
 
-chai.use(sinonChai)
+chai.use(require('sinon-chai'))
 
 describe('remi', function() {
   let app
