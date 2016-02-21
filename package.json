@@ -37,7 +37,7 @@
     "registry": "http://registry.npmjs.org"
   },
   "dependencies": {
-    "magic-hook": "^0.2.2"
+    "magic-hook": "^1.0.0"
   },
   "devDependencies": {
     "chai": "^3.4.1",
