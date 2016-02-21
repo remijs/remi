@@ -124,21 +124,26 @@ describe('remi', function() {
     registrator
       .register({ attributes: {name: 'foo'} })
       .catch(err => {
-        expect(err).to.be.an.instanceof(Error, 'Plugin missing a register method')
+        expect(err).to.be.an
+          .instanceof(Error, 'Plugin missing a register method')
         done()
       })
   })
 
-  it('should throw error if one of the register methods has thrown one', function(done) {
-    registrator
-      .register({
-        register: plugiator.create('foo', (app, opts, next) => next(new Error('Some error'))),
-      })
-      .catch(err => {
-        expect(err).to.be.an.instanceof(Error, 'Failed to register foo. Error: Some error')
-        done()
-      })
-  })
+  it('should throw error if one of the register methods has thrown one',
+    function(done) {
+      registrator
+        .register({
+          register: plugiator
+            .create('foo', (app, opts, next) => next(new Error('Some error'))),
+        })
+        .catch(err => {
+          expect(err).to.be.an
+            .instanceof(Error, 'Failed to register foo. Error: Some error')
+          done()
+        })
+    }
+  )
 
   describe('plugin context', function() {
     it('should not share properties assigned by another plugin', function() {
@@ -207,10 +212,11 @@ describe('remi', function() {
       registrator.hook((next, target, plugin, cb) => {
         next(Object.assign({}, { foo: 1 }, target), plugin, cb)
       })
-      return registrator.register(plugiator.anonymous((target, server, next) => {
-        expect(target.foo).to.eq(1)
-        next()
-      }))
+      return registrator
+        .register(plugiator.anonymous((target, server, next) => {
+          expect(target.foo).to.eq(1)
+          next()
+        }))
     })
 
     it('should add several hooks passed as arguments', function() {
@@ -220,11 +226,12 @@ describe('remi', function() {
       const hook1 = sinon.spy(noopHook)
       const hook2 = sinon.spy(noopHook)
       registrator.hook(hook1, hook2)
-      return registrator.register(plugiator.anonymous((target, server, next) => {
-        expect(hook1).to.have.been.calledOnce
-        expect(hook2).to.have.been.calledOnce
-        next()
-      }))
+      return registrator
+        .register(plugiator.anonymous((target, server, next) => {
+          expect(hook1).to.have.been.calledOnce
+          expect(hook2).to.have.been.calledOnce
+          next()
+        }))
     })
 
     it('should add several hooks passed in an array', function() {
@@ -234,11 +241,12 @@ describe('remi', function() {
       const hook1 = sinon.spy(noopHook)
       const hook2 = sinon.spy(noopHook)
       registrator.hook([hook1, hook2])
-      return registrator.register(plugiator.anonymous((target, server, next) => {
-        expect(hook1).to.have.been.calledOnce
-        expect(hook2).to.have.been.calledOnce
-        next()
-      }))
+      return registrator
+        .register(plugiator.anonymous((target, server, next) => {
+          expect(hook1).to.have.been.calledOnce
+          expect(hook2).to.have.been.calledOnce
+          next()
+        }))
     })
   })
 })

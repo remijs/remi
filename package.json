@@ -4,7 +4,10 @@
   "description": "A plugin registrator.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test/{**/,/}*.js",
+    "test-jscs": "node_modules/jscs/bin/jscs index.js test/index.js example",
+    "test-jshint": "jshint index.js test/index.js example",
+    "test-style": "npm run test-jshint && npm run test-jscs",
+    "test": "npm run test-style && mocha test/{**/,/}*.js",
     "coverage": "istanbul cover _mocha test/{**/,/}*.js -- -R spec",
     "precoveralls": "istanbul cover _mocha test/{**/,/}*.js --report lcovonly -- -R spec && npm i coveralls@2",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
@@ -42,6 +45,8 @@
   "devDependencies": {
     "chai": "^3.4.1",
     "istanbul": "^0.4.2",
+    "jscs": "^2.10.1",
+    "jshint": "^2.9.1",
     "mocha": "^2.3.3",
     "plugiator": "^0.1.1",
     "sinon": "^1.17.2",

@@ -38,8 +38,6 @@
 
   "disallowVar": true,
 
-  "maximumNumberOfLines": 100,
-
   "requireAnonymousFunctions": {
     "allExcept": ["declarations"]
   },
