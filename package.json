@@ -3,15 +3,22 @@
   "version": "1.0.0",
   "description": "A plugin registrator.",
   "main": "index.js",
+  "typings": "./dist/remi.d.ts",
   "scripts": {
-    "test-jscs": "node_modules/jscs/bin/jscs index.js test/index.js example",
-    "test-jshint": "jshint index.js test/index.js example",
-    "test-style": "npm run test-jshint && npm run test-jscs",
+    "test-jscs": "node_modules/jscs/bin/jscs test/index.js example",
+    "test-jshint": "jshint test/index.js example",
+    "test-tslint": "tslint -c tslint.json ./src/*.ts",
+    "test-style": "npm run test-tslint && npm run test-jshint && npm run test-jscs",
+    "pretest": "npm run transpile",
     "test": "npm run test-style && mocha test/{**/,/}*.js",
     "coverage": "istanbul cover _mocha test/{**/,/}*.js -- -R spec",
     "precoveralls": "istanbul cover _mocha test/{**/,/}*.js --report lcovonly -- -R spec && npm i coveralls@2",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "postcoveralls": "rm -rf ./coverage"
+    "postcoveralls": "rm -rf ./coverage",
+    "transpile": "npm run typescript-transpile && npm run babel-transpile",
+    "typescript-transpile": "tsc",
+    "babel-transpile": "babel dist/remi.js --out-file dist/remi.es5.js",
+    "prepublish": "npm run transpile"
   },
   "repository": {
     "type": "git",
@@ -24,7 +31,8 @@
     "register"
   ],
   "files": [
-    "index.js"
+    "index.js",
+    "dist"
   ],
   "author": {
     "name": "Zoltan Kochan",
@@ -40,9 +48,13 @@
     "registry": "http://registry.npmjs.org"
   },
   "dependencies": {
-    "magic-hook": "^1.0.0"
+    "magic-hook": "^1.1.0-2"
   },
   "devDependencies": {
+    "babel-cli": "^6.6.5",
+    "babel-plugin-add-module-exports": "^0.1.2",
+    "babel-preset-es2015": "^6.6.0",
+    "babel-register": "^6.7.2",
     "chai": "^3.4.1",
     "istanbul": "^0.4.2",
     "jscs": "^2.10.1",
@@ -50,6 +62,8 @@
     "mocha": "^2.3.3",
     "plugiator": "^0.1.1",
     "sinon": "^1.17.2",
-    "sinon-chai": "^2.8.0"
+    "sinon-chai": "^2.8.0",
+    "tslint": "^3.6.0",
+    "typescript": "^1.8.9"
   }
 }
