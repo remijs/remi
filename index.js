@@ -1,19 +1,16 @@
-'use strict'
-const hook = require('magic-hook')
+import hook from 'magic-hook/es5'
 
-module.exports = remi
-
-function remi(target) {
-  const register = hook(function(target, plugin, cb) {
+export default function remi (target) {
+  const register = hook((target, plugin, cb) => {
     plugin.register(target, plugin.options, cb)
   })
 
-  function registerNext(plugins, cb) {
+  function registerNext (plugins, cb) {
     const plugin = plugins.shift()
 
     if (!plugin) return cb()
 
-    function wrapError(err) {
+    function wrapError (err) {
       const wrapperErr = new Error('Failed to register ' + plugin.name +
         '. ' + err)
       wrapperErr.internalError = err
@@ -21,9 +18,12 @@ function remi(target) {
     }
 
     register(
-      Object.assign({}, { root: target }, target),
+      {
+        ...target,
+        root: target
+      },
       plugin,
-      function(err) {
+      (err) => {
         if (err) return cb(wrapError(err))
 
         target.registrations[plugin.name] = plugin
@@ -32,7 +32,7 @@ function remi(target) {
     )
   }
 
-  function getRegister(plugin) {
+  function getRegister (plugin) {
     if (typeof plugin !== 'function' && !plugin.register) {
       throw new Error('Plugin missing a register method')
     }
@@ -46,36 +46,37 @@ function remi(target) {
     return plugin.register
   }
 
-  function pluginToRegistration(plugin) {
+  function pluginToRegistration (plugin) {
     const register = getRegister(plugin)
 
     const attributes = register.attributes
-    return Object.assign(attributes, {
+    return {
+      ...attributes,
       register,
       name: attributes.name || attributes.pkg.name,
       version: attributes.version || attributes.pkg && attributes.pkg.version,
-      options: Object.assign({}, plugin.options),
-    })
+      options: {...plugin.options}
+    }
   }
 
   return {
     hook: register.pre,
-    register(plugins) {
+    register (plugins) {
       try {
         plugins = [].concat(plugins)
         target.registrations = target.registrations || {}
 
         const newRegistrations = plugins
           .map(pluginToRegistration)
-          .filter(reg => !target.registrations[reg.name])
+          .filter((reg) => !target.registrations[reg.name])
 
         return new Promise((resolve, reject) => {
-          const cb = err => err ? reject(err) : resolve()
+          const cb = (err) => err ? reject(err) : resolve()
           registerNext(newRegistrations, cb)
         })
       } catch (err) {
         return Promise.reject(err)
       }
-    },
+    }
   }
 }

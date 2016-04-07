@@ -1,25 +1,22 @@
-'use strict'
-const describe = require('mocha').describe
-const beforeEach = require('mocha').beforeEach
-const it = require('mocha').it
-const chai = require('chai')
-const expect = chai.expect
-const sinon = require('sinon')
-const plugiator = require('plugiator')
-const remi = require('..')
+import {describe, it, beforeEach} from 'mocha'
+import {expect} from 'chai'
+import chai from 'chai'
+import sinon from 'sinon'
+import * as plugiator from 'plugiator'
+import remi from '../index'
 
 chai.use(require('sinon-chai'))
 
-describe('remi', function() {
+describe('remi', () => {
   let app
   let registrator
 
-  beforeEach(function() {
+  beforeEach(() => {
     app = {}
     registrator = remi(app)
   })
 
-  it('should register plugin with no version', function() {
+  it('should register plugin with no version', () => {
     const plugin = plugiator.anonymous((app, options, next) => next())
 
     return registrator
@@ -27,14 +24,14 @@ describe('remi', function() {
       .then(() => expect(app.registrations[plugin.attributes.name]).to.exist)
   })
 
-  it('should register plugin with attributes from a package.json', function() {
+  it('should register plugin with attributes from a package.json', () => {
     const name = 'foo'
     const version = '2.4.0'
     const plugin = plugiator.create({
       pkg: {
         name,
-        version,
-      },
+        version
+      }
     }, (app, options, next) => next())
 
     return registrator
@@ -46,10 +43,10 @@ describe('remi', function() {
       })
   })
 
-  it('should pass all the attributes to the registrations object', function() {
+  it('should pass all the attributes to the registrations object', () => {
     const plugin = plugiator.noop({
       name: 'some-name',
-      foo: 'foo',
+      foo: 'foo'
     })
 
     return registrator
@@ -59,7 +56,7 @@ describe('remi', function() {
       })
   })
 
-  it('should register plugin that is passed as an object', function() {
+  it('should register plugin that is passed as an object', () => {
     const register = sinon.spy(plugiator.noop())
     const plugin = { register }
 
@@ -70,7 +67,7 @@ describe('remi', function() {
       })
   })
 
-  it('should register plugin with options', function() {
+  it('should register plugin with options', () => {
     const register = sinon.spy(plugiator.noop())
     const pluginOpts = { something: true }
 
@@ -82,24 +79,24 @@ describe('remi', function() {
       })
   })
 
-  it('should expose the registrations object', function() {
+  it('should expose the registrations object', () => {
     const plugin1 = plugiator.noop({
       name: 'plugin1',
-      version: '0.0.0',
+      version: '0.0.0'
     })
     const plugin2 = plugiator.noop({
       name: 'plugin2',
-      version: '0.1.0',
+      version: '0.1.0'
     })
 
     const plugins = [
       {
         register: plugin1,
-        options: {foo: 1},
+        options: {foo: 1}
       },
       {
-        register: plugin2,
-      },
+        register: plugin2
+      }
     ]
     return registrator.register(plugins).then(() => {
       expect(app.registrations).to.not.be.undefined
@@ -114,7 +111,7 @@ describe('remi', function() {
     })
   })
 
-  it('should register plugin only once', function() {
+  it('should register plugin only once', () => {
     const plugin = sinon.spy(plugiator.noop())
 
     return registrator.register([plugin])
@@ -122,10 +119,10 @@ describe('remi', function() {
       .then(() => expect(plugin).to.have.been.calledOnce)
   })
 
-  it('should throw error if no register method passed', function(done) {
+  it('should throw error if no register method passed', (done) => {
     registrator
       .register({ attributes: {name: 'foo'} })
-      .catch(err => {
+      .catch((err) => {
         expect(err).to.be.an
           .instanceof(Error, 'Plugin missing a register method')
         done()
@@ -133,13 +130,13 @@ describe('remi', function() {
   })
 
   it('should throw error if one of the register methods has thrown one',
-    function(done) {
+    (done) => {
       registrator
         .register({
           register: plugiator
-            .create('foo', (app, opts, next) => next(new Error('Some error'))),
+            .create('foo', (app, opts, next) => next(new Error('Some error')))
         })
-        .catch(err => {
+        .catch((err) => {
           expect(err).to.be.an
             .instanceof(Error, 'Failed to register foo. Error: Some error')
           done()
@@ -147,8 +144,8 @@ describe('remi', function() {
     }
   )
 
-  describe('plugin context', function() {
-    it('should not share properties assigned by another plugin', function() {
+  describe('plugin context', () => {
+    it('should not share properties assigned by another plugin', () => {
       const plugin1 = plugiator.anonymous((app, opts, next) => {
         app.foo = 1
         next()
@@ -161,16 +158,16 @@ describe('remi', function() {
       const plugins = [
         {
           register: plugin1,
-          options: {foo: 1},
+          options: {foo: 1}
         },
         {
-          register: plugin2,
-        },
+          register: plugin2
+        }
       ]
       return registrator.register(plugins)
     })
 
-    it('should pass all the enumerable app props to the plugin', function() {
+    it('should pass all the enumerable app props to the plugin', () => {
       const plugin = plugiator.anonymous((app, options, next) => {
         expect(app.foo).to.exist
         expect(app.bar).to.exist
@@ -180,11 +177,11 @@ describe('remi', function() {
       })
 
       app.foo = 1
-      app.bar = function() {}
+      app.bar = () => {}
       return registrator.register(plugin)
     })
 
-    it('should share the value in root', function() {
+    it('should share the value in root', () => {
       const plugin1 = plugiator.anonymous((app, options, next) => {
         app.root.foo = 1
         next()
@@ -198,21 +195,21 @@ describe('remi', function() {
       const plugins = [
         {
           register: plugin1,
-          options: {foo: 1},
+          options: {foo: 1}
         },
         {
-          register: plugin2,
-        },
+          register: plugin2
+        }
       ]
 
       return registrator.register(plugins)
     })
   })
 
-  describe('remi hooks', function() {
-    it('should get options', function() {
+  describe('remi hooks', () => {
+    it('should get options', () => {
       registrator.hook((next, target, plugin, cb) => {
-        next(Object.assign({}, { foo: 1 }, target), plugin, cb)
+        next({ foo: 1, ...target }, plugin, cb)
       })
       return registrator
         .register(plugiator.anonymous((target, server, next) => {
@@ -221,8 +218,8 @@ describe('remi', function() {
         }))
     })
 
-    it('should add several hooks passed as arguments', function() {
-      function noopHook(next, target, plugin, cb) {
+    it('should add several hooks passed as arguments', () => {
+      function noopHook (next, target, plugin, cb) {
         next(target, plugin, cb)
       }
       const hook1 = sinon.spy(noopHook)
@@ -236,8 +233,8 @@ describe('remi', function() {
         }))
     })
 
-    it('should add several hooks passed in an array', function() {
-      function noopHook(next, target, plugin, cb) {
+    it('should add several hooks passed in an array', () => {
+      function noopHook (next, target, plugin, cb) {
         next(target, plugin, cb)
       }
       const hook1 = sinon.spy(noopHook)
