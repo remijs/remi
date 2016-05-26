@@ -58,6 +58,6 @@
     "plugiator": "^0.2.1",
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0",
-    "standard": "^6.0.8"
+    "standard": "^7.1.1"
   }
 }
