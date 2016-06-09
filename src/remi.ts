@@ -1,4 +1,4 @@
-import hook from 'magic-hook'
+import hook, {PreHook, FuncReturns} from 'magic-hook'
 
 export type Plugin = {
   (target: Object, options: Object, next?: Function): Promise<any> | void
@@ -15,8 +15,15 @@ export type NormalizedPlugin = {
 }
 export type ErrorCallback = (err?: Error) => void
 
-export default function remi(target: any) {
-  const register = hook(function(target: any, plugin: NormalizedPlugin, cb: ErrorCallback): void {
+export type RemiHook<T> = {
+  (target: T, plugin: NormalizedPlugin, cb: ErrorCallback): void
+}
+
+export default function remi<T extends {registrations?: any}>(target: T): {
+  hook(...hooks: PreHook<FuncReturns<T>, void>[]): void,
+  register(plugins: AnyPlugin[]): Promise<void>
+} {
+  const register = hook(function(target: T, plugin: NormalizedPlugin, cb: ErrorCallback): void {
     plugin.register(target, plugin.options, cb)
   })
 
