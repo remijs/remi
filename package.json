@@ -40,14 +40,16 @@
   },
   "homepage": "https://github.com/remijs/remi#readme",
   "mos": {
-    "plugins": ["readme"]
+    "plugins": [
+      "readme"
+    ]
   },
   "publishConfig": {
     "registry": "http://registry.npmjs.org"
   },
   "dependencies": {
     "babel-runtime": "^6.9.0",
-    "magic-hook": "^1.0.0"
+    "magic-hook": "^2.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.6.5",
