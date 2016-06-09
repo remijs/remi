@@ -6,12 +6,9 @@
   "jsnext:main": "./dist/index.js",
   "typings": "./dist/remi.d.ts",
   "scripts": {
-    "test-jscs": "node_modules/jscs/bin/jscs test/index.js example",
-    "test-jshint": "jshint test/index.js example",
     "test-tslint": "tslint -c tslint.json ./src/*.ts",
-    "test-style": "npm run test-tslint && npm run test-jshint && npm run test-jscs",
     "pretest": "npm run transpile",
-    "test": "npm run test-style && mocha --compilers js:babel-register && mos test",
+    "test": "npm run test-tslint && mocha --compilers js:babel-register && mos test",
     "coverage": "istanbul cover node_modules/mocha/bin/_mocha -- --compilers js:babel-register -R spec",
     "precoveralls": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --compilers js:babel-register -R spec && npm i coveralls@2",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",

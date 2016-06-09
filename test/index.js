@@ -209,7 +209,7 @@ describe('remi', () => {
   describe('remi hooks', () => {
     it('should get options', () => {
       registrator.hook((next, target, plugin, cb) => {
-        next({ foo: 1, ...target }, plugin, cb)
+        next(Object.assign({}, { foo: 1 }, target), plugin, cb)
       })
       return registrator
         .register(plugiator.anonymous((target, server, next) => {
