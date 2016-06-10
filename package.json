@@ -3,8 +3,8 @@
   "version": "2.0.0",
   "description": "A plugin registrator.",
   "main": "index.js",
-  "jsnext:main": "./dist/index.js",
-  "typings": "./dist/remi.d.ts",
+  "jsnext:main": "dist/esnext/index.js",
+  "typings": "dist/esnext/index.d.ts",
   "scripts": {
     "test-tslint": "tslint -c tslint.json ./src/*.ts",
     "pretest": "npm run transpile",
@@ -15,7 +15,7 @@
     "postcoveralls": "rm -rf ./coverage",
     "transpile": "npm run typescript-transpile && npm run babel-transpile",
     "typescript-transpile": "tsc",
-    "babel-transpile": "babel dist/remi.js --out-file dist/remi.es5.js",
+    "babel-transpile": "babel dist/esnext --out-dir dist/es5",
     "prepublish": "npm run transpile",
     "md": "mos"
   },
@@ -31,7 +31,7 @@
   ],
   "files": [
     "index.js",
-    "dist"
+    "dist/"
   ],
   "author": {
     "name": "Zoltan Kochan",

@@ -1,1 +1,1 @@
-module.exports = require('./dist/remi.es5')
+module.exports = require('./dist/es5')

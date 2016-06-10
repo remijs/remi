@@ -7,11 +7,11 @@
     "noImplicitAny": true,
     "suppressImplicitAnyIndexErrors": true,
     "target": "es6",
-    "outDir": "dist",
+    "outDir": "dist/esnext",
     "module": "es2015",
     "moduleResolution": "node"
   },
   "files": [
-    "src/remi.ts"
+    "src/index.ts"
   ]
 }
