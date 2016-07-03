@@ -1,6 +1,6 @@
 {
   "name": "remi",
-  "version": "2.0.0",
+  "version": "2.0.0-0",
   "description": "A plugin registrator.",
   "main": "index.js",
   "jsnext:main": "dist/esnext/index.js",
@@ -44,7 +44,9 @@
   },
   "homepage": "https://github.com/remijs/remi#readme",
   "mos": {
-    "plugins": ["readme"]
+    "plugins": [
+      "readme"
+    ]
   },
   "publishConfig": {
     "registry": "http://registry.npmjs.org"

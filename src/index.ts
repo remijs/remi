@@ -4,9 +4,7 @@ export type Plugin = {
   (target: Object, options: Object, next?: Function): Promise<any> | void
   attributes: any
 }
-export type RegisterPlugin = { register: Plugin }
-export type WrappedRegisterPlugin = { register: { register: Plugin } }
-export type AnyPlugin = (Plugin | RegisterPlugin | WrappedRegisterPlugin) & { options?: any }
+export type PluginRegistrator = { register: Plugin, options?: any }
 export type NormalizedPlugin = {
   register: Plugin
   name: string
@@ -19,9 +17,11 @@ export type RemiHook<T> = {
   (target: T, plugin: NormalizedPlugin, cb: ErrorCallback): void
 }
 
+export {PreHook, FuncReturns}
+
 export default function remi<T extends {registrations?: any}>(target: T): {
   hook(...hooks: PreHook<FuncReturns<T>, void>[]): void,
-  register(plugins: AnyPlugin[]): Promise<void>
+  register(plugins: PluginRegistrator[]): Promise<void>
 } {
   const register = hook(function(target: T, plugin: NormalizedPlugin, cb: ErrorCallback): void {
     plugin.register(target, plugin.options, cb)
@@ -53,30 +53,10 @@ export default function remi<T extends {registrations?: any}>(target: T): {
     )
   }
 
-  function getRegister(plugin: AnyPlugin): Plugin {
-    if (typeof plugin !== 'function' && !plugin['register']) {
-      throw new Error('Plugin missing a register method')
-    }
-
-    // plugin is register() function
-    if (typeof plugin === 'function' && !(<RegisterPlugin>plugin).register) {
-      return <Plugin>plugin
-    }
-
-    // Required plugin
-    if ((<WrappedRegisterPlugin>plugin).register.register) {
-      return (<WrappedRegisterPlugin>plugin).register.register
-    }
-
-    return (<RegisterPlugin>plugin).register
-  }
-
-  function pluginToRegistration(plugin: AnyPlugin): NormalizedPlugin {
-    const register: Plugin = getRegister(plugin)
-
-    const attributes = register.attributes
+  function pluginToRegistration(plugin: PluginRegistrator): NormalizedPlugin {
+    const attributes = plugin.register.attributes
     return Object.assign(attributes, {
-      register,
+      register: plugin.register,
       name: attributes.name || attributes.pkg.name,
       version: attributes.version || attributes.pkg && attributes.pkg.version,
       options: Object.assign({}, plugin.options),
@@ -85,7 +65,7 @@ export default function remi<T extends {registrations?: any}>(target: T): {
 
   return {
     hook: register.pre,
-    register(plugins: AnyPlugin[]): Promise<void> {
+    register(plugins: PluginRegistrator[]): Promise<void> {
       try {
         plugins = [].concat(plugins)
         target.registrations = target.registrations || {}

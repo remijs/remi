@@ -56,17 +56,6 @@ describe('remi', () => {
       })
   })
 
-  it('should register plugin that is passed as an object', () => {
-    const register = sinon.spy(plugiator.noop())
-    const plugin = { register }
-
-    return registrator
-      .register({ register: plugin })
-      .then(() => {
-        expect(register).to.have.been.calledOnce
-      })
-  })
-
   it('should register plugin with options', () => {
     const register = sinon.spy(plugiator.noop())
     const pluginOpts = { something: true }
@@ -114,8 +103,8 @@ describe('remi', () => {
   it('should register plugin only once', () => {
     const plugin = sinon.spy(plugiator.noop())
 
-    return registrator.register([plugin])
-      .then(() => registrator.register([plugin]))
+    return registrator.register([{register: plugin}])
+      .then(() => registrator.register([{register: plugin}]))
       .then(() => expect(plugin).to.have.been.calledOnce)
   })
 
@@ -178,7 +167,7 @@ describe('remi', () => {
 
       app.foo = 1
       app.bar = () => {}
-      return registrator.register(plugin)
+      return registrator.register({register: plugin})
     })
 
     it('should share the value in root', () => {
@@ -212,10 +201,10 @@ describe('remi', () => {
         next(Object.assign({}, { foo: 1 }, target), plugin, cb)
       })
       return registrator
-        .register(plugiator.anonymous((target, server, next) => {
+        .register({register: plugiator.anonymous((target, server, next) => {
           expect(target.foo).to.eq(1)
           next()
-        }))
+        })})
     })
 
     it('should add several hooks passed as arguments', () => {
@@ -226,11 +215,13 @@ describe('remi', () => {
       const hook2 = sinon.spy(noopHook)
       registrator.hook(hook1, hook2)
       return registrator
-        .register(plugiator.anonymous((target, server, next) => {
-          expect(hook1).to.have.been.calledOnce
-          expect(hook2).to.have.been.calledOnce
-          next()
-        }))
+        .register({
+          register: plugiator.anonymous((target, server, next) => {
+            expect(hook1).to.have.been.calledOnce
+            expect(hook2).to.have.been.calledOnce
+            next()
+          })
+        })
     })
 
     it('should add several hooks passed in an array', () => {
@@ -241,11 +232,12 @@ describe('remi', () => {
       const hook2 = sinon.spy(noopHook)
       registrator.hook([hook1, hook2])
       return registrator
-        .register(plugiator.anonymous((target, server, next) => {
+        .register({register: plugiator.anonymous((target, server, next) => {
           expect(hook1).to.have.been.calledOnce
           expect(hook2).to.have.been.calledOnce
           next()
-        }))
+        })
+      })
     })
   })
 })
