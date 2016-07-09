@@ -27,13 +27,11 @@ additional information about the plugin, such as name and version.
 A very simple plugin looks like:
 
 ```js
-let myPlugin = {
-  register(app, options, next) {
-    next()
-  }
+function myPlugin (app, options, next) {
+  next()
 }
 
-myPlugin.register.attributes = {
+myPlugin.attributes = {
   name: 'myPlugin',
   version: '1.0.0',
 }
@@ -42,13 +40,15 @@ myPlugin.register.attributes = {
 Or when written as an external module:
 
 ```js
-module.exports = function(app, options, next) {
+function plugin (app, options, next) {
   next()
 }
 
-module.exports.attributes = {
+plugin.attributes = {
   pkg: require('./package.json'),
 }
+
+module.exports = plugin
 ```
 
 Note that in the first example, we set the `name` and `version` attributes specifically,
@@ -79,17 +79,17 @@ const remi = require('remi')
 // load one plugin
 let registrator = remi(app)
 registrator
-  .register(require('myplugin'))
+  .register([{ register: require('myplugin') }])
   .then(() => console.log('myplugin was successfully registered'))
   .catch(err => console.error('Failed to load plugin:', err))
 
 // load multiple plugins
 registrator
-  .register([require('myplugin'), require('yourplugin')])
+  .register([{ register: require('myplugin') }, { register: require('yourplugin') }])
   .catch(err => console.error('Failed to load plugin:', err))
 ```
 
-To pass options to your plugin, we instead create an object with `register` and `options` keys, such as:
+To pass options to your plugin, we create an object with `register` and `options` keys, such as:
 
 ```js
 registrator.register({

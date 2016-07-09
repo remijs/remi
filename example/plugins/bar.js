@@ -1,12 +1,14 @@
 'use strict'
-module.exports = function (hub, options, next) {
+function plugin (hub, options, next) {
   for (let i = 0; i < options.sayTimes; i++) {
     console.log('Foo says: ' + hub.fooSays)
   }
   next()
 }
 
-module.exports.attributes = {
+plugin.attributes = {
   name: 'bar',
   version: '0.0.0'
 }
+
+module.exports = plugin

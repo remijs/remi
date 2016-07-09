@@ -1,10 +1,12 @@
 'use strict'
-module.exports = function (hub, options, next) {
+function plugin (hub, options, next) {
   hub.root.fooSays = 'Hello world!'
   next()
 }
 
-module.exports.attributes = {
+plugin.attributes = {
   name: 'foo',
   version: '0.0.0'
 }
+
+module.exports = plugin
