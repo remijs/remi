@@ -70,6 +70,6 @@
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0",
     "tslint": "^3.6.0",
-    "typescript": "^1.8.9"
+    "typescript": "^2.0.10"
   }
 }
