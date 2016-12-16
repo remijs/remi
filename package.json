@@ -69,7 +69,7 @@
     "plugiator": "^0.2.1",
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0",
-    "tslint": "^3.6.0",
+    "tslint": "^4.1.1",
     "typescript": "^1.8.9"
   }
 }
