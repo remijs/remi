@@ -1,5 +1,7 @@
 # remi
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/remijs/remi.svg)](https://greenkeeper.io/)
+
 > A plugin registrator.
 
 <!--@shields('npm', 'travis', 'coveralls')-->
